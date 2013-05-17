@@ -1,0 +1,62 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- beautifulsoup
+- data
+- python
+- screen-scraping
+layout: post
+published: true
+title: Chuck Norris doesn't screen-scrape, the data runs scared to his hard drive.
+---
+Inspired by a <a href="http://twitter.com/#!/infoarbitrage/status/42611272902115328">tweet</a> from <a href="http://twitter.com/#!/infoarbitrage">Roger Ehrenberg</a> and my 11-year-old son who's crazy about Chuck Norris facts, I screen-scraped the contents of <a href="http://www.chucknorrisfacts.com/" target="_blank">http://www.chucknorrisfacts.com</a>. Code and data can be found <a href="https://github.com/neilkod/chucknorrisfacts">here</a>.
+
+Using Python and <a href="http://www.crummy.com/software/BeautifulSoup/">BeautifulSoup</a>, it simply loops through all of the pages on <a title="www.chucknorrisfacts.com" href="http://www.chucknorrisfacts.com" target="_blank">http://www.chucknorrisfacts.com</a> and reads the items displayed on the page.
+
+[python]
+
+#!/usr/bin/python
+import urllib2, time
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
+
+# 674 pages last time I checked. Oddly enough, their pages seem zero-based. Additionally, if you
+# substitute an arbitrary number, outside of the range of pages, you'll get data back instead
+# of 404. I'm not sure why they're doing this.
+for page_num in range(0,674):
+	url = 'http://www.chucknorrisfacts.com/all-chuck-norris-facts?page=%d' % page_num
+	html = urllib2.urlopen(url)
+	soup = BeautifulSoup(html)
+
+	entries = soup.findAll(&quot;li&quot;,&quot;views-row&quot;)
+	for entry in entries:
+
+		# use BeautifulStoneSoup to remove any HTML-escaped text that BS returns.
+		the_quote = BeautifulStoneSoup(entry.div.text,
+		                   convertEntities=BeautifulStoneSoup.HTML_ENTITIES).contents[0]
+
+		# print it to stdout. I just redirect the program's output to a file.
+		print the_quote.encode('utf-8')
+	# be a good citizen and wait a few seconds before visiting the next page
+	time.sleep(6)
+
+[/python]
+
+Output looks like
+
+[text]
+if the mountain won't come to Muhammad, Chuck Norris will bring it.
+if you watch the ring you die in 7 days,if you look at Ckuck Norris you die instantly
+in a real zombie apocalypse, Chuck Norris can roundhouse-kick 53,596 zombies dead.
+in space no-one can hear you scream.....except chuck norris!
+iphone 4? chuck norris has iphone 8
+most kids pee their name into snow... Chuck Norris pisses his in concreate...
+never say you can'thurt a fly to chuck norris because he will hurt you
+new never-before-seen behind-the-scenes shots from Walker Texas Range shows Chuck Norris carrying his truck home after it broke down
+no one has ever found where the smurfs live thats  becuase they live  in chuck norrises beard
+...
+[/text]
+Visit my <a href="https://github.com/neilkod/chucknorrisfacts" target="_blank">github</a> for the full dataset (5500 entries).</pre>

@@ -1,0 +1,112 @@
+--- 
+meta: 
+  syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- dba
+- open source
+- oracle
+- plsql
+- script
+- sql
+layout: post
+published: true
+title: "Manager: How big is my table?  Me: What do you mean?"
+---
+Recently, a data warehouse manager sent me a list of 49 tables; he wants the approximate size of each.  For an end-user, this is no easy task.  Sure, GUI interfaces such as Toad or OEM will give this information, but not all managers (or developers for that matter) know how to get this information. 
+
+Furthermore, what constitutes table size?  Is it the space occupied by data?  What about indexes?  LOBs?  Oracle Text Indexes? Fortunately this schema didn't contain any LOBs otherwise I'd have to look those sizes up.
+
+Knowing what I do about both the manager and the project, I'm assuming that they wanted size info on these tables, to make sure we have enough room to clone them somewhere.  I chose the safest route and opted to produce data + index size for him. 
+
+My goal was to write a query that would present the data in a manager-friendly way.  A secondary goal(Sounds like I've been playing too much Command & Conquer) would be to provide him with a query so he could get this information on his own.
+
+Here's my first cut at the query(explanation follows the SQL):
+
+[sql]with table_list as (select  table_name
+                         ,  owner
+                         ,  num_rows
+                         ,  avg_row_len
+                         ,  last_analyzed
+            from  all_tables
+           where  owner = 'SCHEMANAME'
+             and  table_name in ( 'TABLE1'
+                                , 'TABLE2'
+                                , 'TABLE3'
+...
+                                , 'TABLE49'))
+select  a.owner &quot;table owner&quot;
+     ,  a.table_name &quot;table name&quot;
+     ,  avg(ROUND(b.bytes/1024/1024,2)) &quot;table size in mb&quot;
+     ,  avg(ROUND(b.bytes/1024/1024/1024,2)) &quot;table size in gb&quot;
+     ,  COUNT(DISTINCT c.index_name) &quot;number of indexes&quot;
+     ,  SUM(ROUND(d.bytes/1024/1024,2)) &quot;index size in mb&quot;
+     ,  SUM(ROUND(d.bytes/1024/1024/1024 , 2)) &quot;index size in gb&quot;
+     ,  ROUND((avg(b.bytes) + sum(d.bytes))/1024/1024,2) &quot;table + indexes in mb&quot;
+     ,  ROUND((avg(b.bytes) + sum(d.bytes))/1024/1024/1024,2) &quot;table + indexes in gb&quot; 
+     ,  a.num_rows &quot;number of rows&quot;
+     ,  a.avg_row_len &quot;average row length&quot;
+     ,  a.last_analyzed &quot;last analyzed&quot;    
+  from  table_list a
+     ,  dba_segments b
+     ,  all_indexes c
+     ,  dba_segments d
+ where  a.table_name = b.segment_name
+   and  b.segment_type = 'TABLE'
+   and  a.owner = b.owner
+   and  a.owner = c.owner(+)
+   and  c.table_name(+) = a.table_name
+   and  c.index_name = d.segment_name(+)
+   and  c.owner = d.owner(+)
+   and  d.segment_type(+) = 'INDEX'
+GROUP BY  a.owner
+       ,  a.table_name
+       ,  a.num_rows
+       ,  a.avg_row_len
+       ,  a.last_analyzed
+order by a.table_name[/sql]
+
+I chose to put the hard-coded schema name and table list in a WITH query only to keep it at the top of the statement - so that the manager, or anyone else editing this query, could easily see where the editable items are.  
+
+The results look like
+<img src="http://www.neilkodner.com/images/skitch/table_sizes-20091103-152323.jpg" alt="table size query results" />
+
+So we're off to a good start.  But then I wanted to make the process even more user-friendly.  That's where the idea of putting this into a stored procedure came in to play.  I created a pipelined row function which displays all of the table + index information, now with LOB support.
+
+So instead of running the query above, it's just a matter of executing a function call(for each table):
+
+[sql]
+SQL&gt; select * From table(table_info_pkg.table_info('CLAIMS'));
+
+TABLE_OWNER                      TABLE_NAME
+-------------------------------- --------------------------------
+TOTAL_TABLE_SIZE_IN_MB TOTAL_TABLE_SIZE_IN_GB TABLE_DATA_SIZE_IN_MB
+---------------------- ---------------------- ---------------------
+TABLE_DATA_SIZE_IN_GB NUMBER_OF_INDEXES INDEX_SIZE_IN_MB INDEX_SIZE_IN_GB
+--------------------- ----------------- ---------------- ----------------
+LOB_SIZE_IN_MB LOB_SIZE_IN_GB NUMBER_OF_LOBS LOBINDEX_SIZE_IN_MB
+-------------- -------------- -------------- -------------------
+LOBINDEX_SIZE_IN_GB  ROW_COUNT AVERAGE_ROW_LENGTH LAST_ANAL
+------------------- ---------- ------------------ ---------
+CUBS_OWNER                       CLAIMS
+                     0                                          108
+                  .11                14               89              .09
+
+TABLE_OWNER                      TABLE_NAME
+-------------------------------- --------------------------------
+TOTAL_TABLE_SIZE_IN_MB TOTAL_TABLE_SIZE_IN_GB TABLE_DATA_SIZE_IN_MB
+---------------------- ---------------------- ---------------------
+TABLE_DATA_SIZE_IN_GB NUMBER_OF_INDEXES INDEX_SIZE_IN_MB INDEX_SIZE_IN_GB
+--------------------- ----------------- ---------------- ----------------
+LOB_SIZE_IN_MB LOB_SIZE_IN_GB NUMBER_OF_LOBS LOBINDEX_SIZE_IN_MB
+-------------- -------------- -------------- -------------------
+LOBINDEX_SIZE_IN_GB  ROW_COUNT AVERAGE_ROW_LENGTH LAST_ANAL
+------------------- ---------- ------------------ ---------
+             0              0              0                   0
+                  0     379029                257 01-JUN-09
+[/sql]
+
+The code for table_info_pkg can be found <a href="http://code.google.com/p/table-info-pkg/">on google code</a> and I welcome any and all feedback, complaints, or anything else you care to throw at me.
+

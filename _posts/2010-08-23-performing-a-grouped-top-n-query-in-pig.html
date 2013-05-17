@@ -1,0 +1,78 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: performing a grouped top-n query in pig
+---
+Over the course of generating a large item-item similarity matrix, I need to reduce the amount of data I'm returning to the calling program.  In short, i'm computing the similarity between over 20,000 different 'items' and that results in a gigantic dataset, to the tune of about 3-4 million elements.  I now need to reduce my dataset down to the nearest neighbors for each item and prune irrelevant data.
+
+The real problem is:
+
+Given a list of 20,000 items, each item has a corresponding 'other' item and the Jaccard/Tanimoto similarity between the two items, show me the k-closest items for each item in my list.
+
+[text]
+
+1   3   .00321
+1   4   .00256
+1   5   .01019
+1   6   .00732
+2   1   .02136
+....
+[/text]
+
+I thought of doing this in pig but wasn't really sure how to limit and sort grouped data.  I submitted a question to <a href="http://hadoop.apache.org/pig/mailing_lists.html#Users">pig-user</a> and the members were helpful.  Since I learned a new trick, I thought I'd document it here in case anyone else is looking to do the same.
+
+Rather than bore everyone with item ids and similarity scores(and violating an NDA and losing lots of friends), I'll use example data from one of Oracle's demo tables, emp:
+
+[text]
+
+SQL&gt; select empno,ename,job,sal,deptno from emp order by deptno,sal desc;
+
+EMPNO ENAME      JOB              SAL     DEPTNO
+---------- ---------- --------- ---------- ----------
+7839 KING       PRESIDENT       5000         10
+7782 CLARK      MANAGER         2450         10
+7934 MILLER     CLERK           1300         10
+7788 SCOTT      ANALYST         3000         20
+7902 FORD       ANALYST         3000         20
+7566 JONES      MANAGER         2975         20
+7876 ADAMS      CLERK           1100         20
+7369 SMITH      CLERK            800         20
+7698 BLAKE      MANAGER         2850         30
+7499 ALLEN      SALESMAN        1600         30
+7844 TURNER     SALESMAN        1500         30
+7654 MARTIN     SALESMAN        1250         30
+7521 WARD       SALESMAN        1250         30
+7900 JAMES      CLERK            950         30
+
+[/text]
+
+From here, I want to limit my data set to the employees with the top 3-highest salaries for each department.  The part that was foreign to me was running multiple statements on my data through each iteration of a FOREACH command.  Through my brief career using hadoop and pig, I've never paid much attention to grouping commands together.  After reading pig-user and also looking at some of <a href="http://www.twitter.com/thedatachef">@TheDataChef</a>'s examples in <a href="http://github.com/Ganglion/sounder">sounder</a>, I now recognize the value in doing so.
+
+The code to generate the top-n (in this case 3) top salaries:
+<script src="http://gist.github.com/546013.js?file=top3salariesbydepartment.pig"></script>
+
+The output produced :
+
+[text]
+(5000,KING,7839,10)
+(2450,CLARK,7782,10)
+(1300,MILLER,7934,10)
+(3000,SCOTT,7788,20)
+(3000,FORD,7902,20)
+(2975,JONES,7566,20)
+(2850,BLAKE,7698,30)
+(1600,ALLEN,7499,30)
+(1500,TURNER,7844,30)
+[/text]
+
+This example is easily extended to solve my original problem-reducing the number of similar items found for each item.  All I'd need to do is group by the first itemid, sort the items in descending order by their Jaccard/Tanimoto score, and then limit to the top-n similarly-scored items for each original itemid.
+
+Now that my data will be sufficiently limited after all of the similarity scores have been calculated, I can let this process run, generate lots of scores, and not worry about polluting my database with extraneous data.  Now time to focus on generating item-item similarity without generating so much useless data in the first place!  Would love to hear your suggestions.

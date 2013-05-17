@@ -1,0 +1,95 @@
+--- 
+meta: 
+  syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- dba
+- oracle
+- performance
+- python
+layout: post
+published: true
+title: Generating multiple Oracle TKPROF reports using Python
+---
+Recently, a customer told me that they felt a batch job was taking too long each night, I gave them a few commands to add to their nightly run.
+
+[sql]
+alter session set tracefile_identifier='charging_batch';
+exec dbms_monitor.session_trace_enable;
+[/sql]
+
+These commands named the tracefile and enabled 10046 logging.
+
+Since I'm lazy(the good kind), I figured I'd use Python to build the commands to run TKPROF for each process.  The program expects to be run from the udump directory.  As I get more time I'll enhance it to automatically grab the location of udump from the database.
+
+The script takes an optional parameter for a tracefile identifier.  If the parameter is passed, filenames containing the identifier text will be processed.  Otherwise, all tracefiles are processed.  A to-do item is to make sure the tracefile is an actual 10046 before running TKPROF against it.
+
+The output format is the optional tracefile identifier_process_id.out.  The file suffix can be overridden with variable tkprof_suffix.  I use .out as an homage to Michael Levy, wherever he may be, who showed me how to use the tool way back in 1998.
+
+[python]
+#!/usr/local/bin/python
+# tkprof.py
+# kodner 2009
+# and runs a simple tkprof on them
+import sys
+import os
+import re
+sort = &quot;fchqry&quot; #parameterize this
+tkprof_suffix = 'out' #this too
+
+# find a string to be used as a tracefile identifier
+# to limit the tracefiles processed
+try:
+  tracefile_identifier = sys.argv[1]
+  print &quot;&quot;
+  print &quot;&quot;
+  print &quot;tracefile identifier supplied is: %s&quot; % (tracefile_identifier)
+  print &quot;&quot;
+  print &quot;&quot;
+except:
+  tracefile_identifier = None
+
+# lists the files with suffix .trc and contain out suffix .trc
+traces=[x for x in os.listdir('.') if x.endswith('.trc')]
+
+for file in traces:
+  tracefile = None
+
+  # extract the process id from the filename.
+  # I'm sure this could be done better.  i split it into multiple
+  # lines for readability.
+
+  processNum = re.findall(r'ora_[0-9]+',file)
+  processNum = processNum[0].split('_')[1]
+
+  # if a tracefile_identifier is supplied then make sure our current file
+  # contains the string.  we'll also make sure the output filename contains
+  # the tracefile identifier.
+
+  if tracefile_identifier:
+    if file.find(tracefile_identifier) &gt; 0:
+      tracefile = file
+      outputfile=tracefile_identifier + '_' + processNum + '.' + tkprof_suffix
+  else:
+    tracefile=file
+    outputfile=processNum + '.' + tkprof_suffix
+
+  if tracefile:
+    print &quot;processing tracefile %s ...&quot; % (tracefile)
+
+    # using regexp, find the process number of the file.
+    # the process number will be used to name the tkprof output file
+
+    # we will assume that the tracefile name is in the format
+    # $ORACLE_SID_ora_$PROCESSNUM.trc
+    # and that the tracefile name may contain a tracefile identifier
+    # set by using alter session set tracefile_identifier = 'foo';
+
+    # generate the tkprof command use flags sys=no and waits=yes
+    command=&quot;tkprof %s %s sys=no waits=yes sort=%s&quot; % (tracefile,outputfile,sort)
+
+    # execute the command
+    os.system(command)
+[/python]

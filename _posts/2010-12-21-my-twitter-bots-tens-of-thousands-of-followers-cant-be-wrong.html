@@ -1,0 +1,93 @@
+--- 
+meta: 
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: 
+- analysis
+- data
+- programming
+- seinfeld
+- twitter
+layout: post
+published: true
+title: "My Twitter bots:  Tens of thousands of followers can't be wrong"
+---
+<strong>edit: March 17, 2011 I need your help! If you have additional Seinfeld quotes to contribute, or for a list of all of the current Seinfeld quotes, <a href="http://www.neilkodner.com/2011/03/looking-for-some-new-quotes-for-hellooooonewman/">please visit this post.</a></strong>
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/12/bot-followers.png"><img class="alignnone size-full wp-image-414" title="bot followers" src="http://www.neilkodner.com/wp-content/uploads/2010/12/bot-followers.png" alt="" width="839" height="182" /></a>
+
+My current army of twitter bots and the keyword that each one responds to:
+<ul>
+	<li><a href="http://www.twitter.com/#!/hellooooonewman">@HelloooooNewman</a> (seinfeld) <a href="http://klout.com/hellooooonewman">Klout score 74</a></li>
+	<li><a href="http://www.twitter.com/#!/thebotlebowski">@TheBotLebowski</a> (lebowski) <a href="http://klout.com/thebotlebowski">Klout score 70</a></li>
+	<li><a href="http://www.twitter.com/#!/acenterforants">@ACenterForAnts</a> (zoolander) <a href="http://klout.com/acenterforants">Klout score 70</a></li>
+	<li><a href="http://www.twitter.com/#!/iamjacksbot">@IAmJacksBot</a> (fight club) <a href="http://klout.com/iamjacksbot">Klout Score 74</a></li>
+	<li><a href="http://www.twitter.com/#!/amaninamask">@AManInAMask</a> (V for Vendetta)</li>
+	<li><a href="http://www.twitter.com/#!/worldofshit">@WorldOfShit</a> (full metal jacket) <a href="http://klout.com/worldofshit">Klout score 65</a></li>
+	<li><a href="http://www.twitter.com/#!/somegrenades">@SomeGrenades</a> (serenity + firefly) <a href="http://klout.com/somegrenades">Klout score 56</a></li>
+	<li><a href="http://www.twitter.com/#!/gunshowtickets">@GunShowTickets</a> (Ron Burgundy) No Klout score yet</li>
+	<li><a href="http://www.twitter.com/#!/pleasebe18">@PleaseBe18</a> (Ricky Bobby)</li>
+	<li><a href="http://www.twitter.com/#!/abakingpowder">@ABakingPowder</a> (schwing) <a href="http://klout.com/abakingpowder">Klout score 54</a></li>
+	<li><a href="http://www.twitter.com/#!/which_is_nice">@Which_is_nice</a> (caddyshack) <a href="http://klout.com/which_is_nice">Klout score 56</a></li>
+	<li><a href="http://www.twitter.com/#!/mitchhedbot">@MitchHedbot</a> (mitch hedberg) No Klout Score yet</li>
+	<li><a href="http://www.twitter.com/#!/dubbbya">@dubbbya</a> (gwb) -- banned from twitter</li>
+	<li><a href="http://www.twitter.com/#!/dreidly">@dreidly</a> (dreidel) -- retired</li>
+</ul>
+I've also built a few programs that scrape air quality data from the State of Utah and tweet the results.
+<ul>
+	<li><a href="http://www.twitter.com/#!/utahairquality">@UtahAirQuality</a> serving Salt Lake and Davis Counties</li>
+	<li><a href="http://www.twitter.com/#!/webercountyair">@WeberCountyAir</a></li>
+	<li><a href="http://www.twitter.com/#!/cachecountyair">@CacheCountyAir</a></li>
+	<li><a href="http://www.twitter.com/#!/utahcountyair">@UtahCountyAir</a></li>
+</ul>
+<a href="http://twitter.com/#!/usadebtlevel">@usadebtlevel</a> which tweets the US National Debt and each US Citizen's share.
+
+And here's a sneak preview: @SarahEffinPalin was conceived after a friend, Willie Morris (<a href="http://www.twitter.com/#!/morewillie">@morewillie</a>) suggested a bot that, lets say, repurposes <a href="http://www.twitter.com/#!/sarahpalinusa">Sarah Palin's</a> tweets.  I think <a href="http://www.twitter.com/#!/saraheffinpalin">@SarahEffinPalin</a> is going to be a hit.
+
+We all know The Big Lebowski is a cult classic and one of the most quoteable movies of all time.  I don't exactly remember how this started but a long time ago, I thought people who mentioned "Lebowski" in a tweet would appreciate receiving a quote from the movie.  So with nothing but the Twitter API docs and a little bit of python, I built <a href="http://www.twitter.com/#!/thebotlebowski">@thebotlebowski</a>, my first auto-responder.  The idea was simple - using urllib2, perform a search for "lebowski", and iterate through the results.  For each result, retrieve a random entry out of a quotes database and tweet it as a reply to the original tweet.
+
+<span style="font-size: 11.6667px;">After a ton of retweets, #ff mentions, replies, and followers, it became pretty obvious that people liked it.  I needed a followup - another infinitely quoteable movie.  Zoolander!  Thus, <a href="http://www.twitter.com/#!/">@ACenterForAnts</a> was born.  Again, my research showed that all mentions of Zoolander on twitter were either references to the movie or Derek Zoolander himself.</span>
+
+Another follow-up was in order.  A <a href="http://www.twitter.com/#!/abstractdata">friend</a> suggested a Seinfeld one.  Done. Welcome <a href="http://www.twitter.com/#!/hellooooonewman">@HelloooooNewman</a>. And then <a href="http://www.twitter.com/#!/iamjacksbot">@IAmJacksBot</a> and then the others.  The key was to create bots that use search terms that are not vague - If someone tweets "Full Metal Jacket", then they're obviously talking about the movie.  Same with "Fight Club."
+
+One of the lessons learned was that not everyone who tweets about "GWB" was necessarily referencing the president.  A <a href="http://www.twitter.com/#!/dtseiler">friend</a> suggested a bot that replies to mentions of GWB with one of George Bush's self-butchered quotes.  People loved it except for people in New York - hey, I didn't realize that so many people tweeted about the George Washington Bridge in abbreviated format!  This includes several NYC twitter accounts that automatically post traffic conditions.  The complaints came in quicker than I could add people to the ignore list.  Eventually, the well-loved but polarizing <a href="http://www.twitter.com/#!/dubbbya">@dubbbya</a> was banned from twitter.  May his <a href="http://www.neilkodner.com/georgewbushquotes.txt">quotes</a> live on in infamy.
+
+While the bots have been very well-received, not everyone likes them.  When there were only a handful of bots, I used to monitor their responses.  Not that there are so many, I've added an ignore list for just this reason.  To add yourself to the ignore list, either contact me, <a href="http://www.twitter.com/#!/@neilkod">tweet me</a>, or visit <a href="http://neilkodsbots.appspot.com">http://neilkodsbots.appspot.com</a>.
+
+<strong>Frequently Asked Questions:</strong>
+
+<strong>Have any celebrities found your bots?</strong>
+
+The bots tweet out to celebrities all of the time.  @ACenterForAnts has tweeted <a href="http://www.twitter.com/#!/redhourben">Ben Stiller</a> many, many times but Ben has never replied.  Sometimes, the celebrities tweet back.  I don't actively monitor the mentions and replies to the bots - there are just too many.  My favorite anecdote, so far, is when <a href="http://www.twitter.com/#!/adamsbaldwin">Adam Baldwin</a> discovered <a href="http://www.twitter.com/#!/worldofshit">@worldofshit</a>, my Full Metal Jacket bot and immediately triggered it over and over to receive new quotes.  He then started tweeting about the bot to his followers and it quickly picked up steam.  I was thrilled to see that one of the stars of Full Metal Jacket was tweeting so favorably about a program that I wrote that I created <a href="http://www.twitter.com/#!/somegrenades">@somegrenades</a> in his honor.
+
+If you notice a celebrity or otherwise notable person referencing one of my bots, please let me know.  <a href="http://www.delicious.com/neilkod/celebrity">The mentions that I know about</a> include Q-Tip, Taleb Kweli, and Fred Durst.
+
+<strong>But you're a data geek, not a twitter programmer!  Are you doing anything cool with the data?</strong>
+
+Yes!  Every tweet that I find, I log.  For example, since <a href="http://www.twitter.com/#!/">@HelloooooNewman</a> has already sent out over 170,000 replies, I have at least that many incoming tweets mentioning Seinfeld in my logs.  I am able to tell who's tweeting about Seinfeld, when people are talking about Seinfeld, what they're saying, and so on and so forth.  I can even tell if certain events, such as the release of a box set or a new event have resulted in an increase of Seinfeld tweets.  For examples of some of the things I've done with the twitter data, check out this <a href="http://www.neilkodner.com/2010/04/hacking-seinfeld-tweets-with-apache-pig-a-work-in-progress/">analysis of Seinfeld Tweets</a> or this <a href="http://www.neilkodner.com/2010/11/what-do-23000-charlie-sheen-tweets-look-like/">word cloud generated from 23,000 tweets about Charlie Sheen</a>.  Please contact me if you'd like to hear more.
+
+<span style="font-size: 11.6667px;"><strong>Would you create a bot for me/my company/my promotion?</strong></span>
+
+I get asked this all of the time.  The answer is:  It depends.  Lets talk.  Before we go about doing this, we'd need to establish a few ground rules.  I've worked very hard to keep the bots entertaining and not spammy.
+
+<strong>The tweets don't include urls or advertisements - Are you making any money off of them?</strong>
+
+While the bots don't generate income directly, they have led to other opportunities and benefits.  For starters, I've picked up a ton of quality followers and contacts that I would have never met.  Additionally, through this experience, I've learned a great deal about twitter the twitter API, and numerous features of Python that I wouldn't have normally dived into.  To answer the question, A few companies and web sites have licensed the technology and I've created custom bots and twitter searches for them.  I've elected to not mention them directly in this post.
+
+<strong>I don't want the bots to reply to my tweets.  Can they ignore me?</strong>
+
+Sure, the easiest way to be ignored is to visit <a href="http://neilkodsbots.appspot.com">http://neilkodsbots.appspot.com</a> and add yourself to the ignore list.  Honor system please!  I didn't feel it was necessary to ask users to authenticate via twitter just so my application could ignore them.
+
+<strong>I'm selling Seinfeld/Zoolander/Lebowski products - will you tweet this link to all of your bots followers?</strong>
+
+I also get asked this all of the time.  <a href="http://www.twitter.com/#!/hellooooonewman">@HelloooooNewman</a> has over ten thousand followers.  <a href="http://www.twitter.com/#!/ACenterForAnts">@ACenterForAnts</a> and <a href="http://www.twitter.com/#!/TheBotLebowski">@TheBotLebowski</a> also combine for another ten thousand followers.  While I won't send a mention of your product/URL/promotion to their followers, I do have other methods of driving traffic and building awareness to a targeted group of followers.  Lets talk.
+
+<strong>May I have the source code?</strong>
+
+Since I've been using this program for a few not-mentioned commercial purposes, I'm not interested in sharing the secret sauce.  I will, however, let you know it was pretty straightforward to do.  Anyone with a minimum of programming skill should be able to do this.
+
+<strong>Will there be more bots?</strong>
+
+Always.  I'm always on the lookout for new ideas.  Let me know if you have any.  The next one on my plate will be one for Eastbound and Down.

@@ -1,0 +1,35 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- census
+- data
+- visualization
+- wordcloud
+layout: post
+published: true
+title: Visualization of Frequently Occurring First Names and Surnames From the 1990 Census
+---
+A really quick visualization I did while researching data for another project.  Census.gov has a <a title="census.gov first names and surnames" href="http://www.census.gov/genealogy/names/">link</a> to the most frequently occurring first names and surnames from the 1990 census.  Surely more current data must exists; I found this dataset by accident.
+
+The original data is tab-delimited in the format:
+<ul>
+	<li> Name</li>
+	<li>Frequency in percent</li>
+	<li>Cumulative Frequency in percent</li>
+	<li>Rank</li>
+</ul>
+The data was already sorted by rank so it was easy to build lists of the top 500 names in each category(male first, female first,surname):
+
+[sourcecode language="bash"]head -500 dist.female.first | awk '{print $1&quot;:&quot;$2}'[/sourcecode]
+
+The data was then loaded into wordle for a quick visualization. Thumbnails are linked to full-size versions. Where I'm headed with this data is to build a corpus of first/last/surnames so that I can develop a spelling corrector, along the lines of <a title="Peter Norvig's spelling corrector" href="http://norvig.com/spell-correct.html">Peter Norvig's sublime spelling corrector</a>.  Think Google's Did You Mean... rather than a spel checker.  I'm plan on a proof-of-concept in Python, followed by an Oracle PL/SQL version.  Another fun project would be to calculate the probability of a given first name + surname.  I plan on spending some time searching for more current data.
+
+[caption id="attachment_154" align="alignnone" width="300" caption="top 500 surnames"]<a href="http://www.neilkodner.com/wp-content/uploads/2010/01/last_names.jpg"><img class="size-medium wp-image-154 " title="last_names" src="http://www.neilkodner.com/wp-content/uploads/2010/01/last_names-300x173.jpg" alt="500 most popular surnames" width="300" height="173" /></a>[/caption]
+
+[caption id="attachment_153" align="alignnone" width="300" caption="top male first names"]<a href="http://www.neilkodner.com/wp-content/uploads/2010/01/male_first.jpg"><img class="size-medium wp-image-153 " title="male_first" src="http://www.neilkodner.com/wp-content/uploads/2010/01/male_first-300x169.jpg" alt="male first names" width="300" height="169" /></a>[/caption]
+
+[caption id="attachment_152" align="alignnone" width="300" caption="top female first names"]<a href="http://www.neilkodner.com/wp-content/uploads/2010/01/female_first.jpg"><img class="size-medium wp-image-152 " title="female_first" src="http://www.neilkodner.com/wp-content/uploads/2010/01/female_first-300x172.jpg" alt="female first names" width="300" height="172" /></a>[/caption]

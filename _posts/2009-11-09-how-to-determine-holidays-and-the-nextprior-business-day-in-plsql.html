@@ -1,0 +1,152 @@
+--- 
+meta: 
+  syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: How to determine holidays and the next/prior business day in PL/SQL
+---
+Here's an <strong>excerpt</strong> of a package I wrote that performs many date-related operations in PL/SQL, as they relate to business days and holidays.  It does a few interesting things, such as determine holiday dates dynamically, and then determine when the holidays should be observed.  It takes holidays falling on a Saturday/Sunday and determines if we need to observe them on a Friday/Monday.  Pioneer day, which is a state holiday only in Utah, falls on the 24th of July.
+
+Functions next_business_day() and prior_business_day() also use recursion - if the next business day falls on a holiday, the functions recursively call themselves (redundant?) to get the following business day.
+
+My goal is to clean this code up and (with my current clients' permission) open-source this.  This code has worked quite well for us and deserves to be shared.  
+
+On the to-do list is to document how the holiday dates are calculated, and split out the holiday-date calculation logic from the observed-date logic.  An example is c_veterans_day below - Veteran's Day always falls on 11-November, but the constant stores the date its observed, for use in date calculations.  Another enhancement would be to add negative-number support to add_business_days()
+
+Here is the package interface
+[sql]  FUNCTION next_business_day(in_date IN DATE)
+  RETURN DATE;
+
+  FUNCTION prior_business_day(in_date IN DATE)
+  RETURN DATE;
+
+  FUNCTION add_business_days (in_date IN DATE, in_number_of_days IN NUMBER)
+  RETURN DATE;
+
+  FUNCTION first_weekday(in_date IN date,in_day_of_week IN VARCHAR2)
+  RETURN DATE; 
+
+[/sql]
+
+and an excerpt of the package body.
+
+[sql]
+--here are a few package constants used to determine the holiday dates, based on my clients' rules.  
+
+    --'set up the holidays
+    c_new_years_day  CONSTANT DATE := holiday_observed(TRUNC(in_date,'YYYY'));
+    c_next_new_year  CONSTANT DATE := holiday_observed(TRUNC(ADD_MONTHS(in_date,12),'YYYY'));
+    c_mlk_day        CONSTANT DATE := first_weekday(TRUNC(in_date,'YYYY'),'MONDAY') + 14;
+    c_presidents_day CONSTANT DATE := first_weekday(TRUNC(in_date,'YYYY'),'MONDAY')+14;
+    c_memorial_day   CONSTANT DATE := first_weekday(ADD_MONTHS(TRUNC(in_date,'YYYY'),5),'MONDAY')-7;
+    c_july_4         CONSTANT DATE := holiday_observed(TO_DATE('04-JUL-'||TO_CHAR(in_date,'YYYY'),'DD-MON-YYYY'));
+    c_pioneer_day    CONSTANT DATE := holiday_observed(TO_DATE('24-JUL-'||TO_CHAR(in_date,'YYYY'),'DD-MON-YYYY'));
+    c_labor_day      CONSTANT DATE := first_weekday(ADD_MONTHS(TRUNC(in_date,'YYYY'),8),'Monday');
+    c_veterans_day   CONSTANT DATE := holiday_observed(TO_DATE('11-NOV-'||TO_CHAR(in_date,'YYYY'),'DD-MON-YYYY'));
+    c_thanksgiving   CONSTANT DATE := first_weekday(ADD_MONTHS(TRUNC(in_date,'YYYY'),10),'THURSDAY')+21;
+    c_christmas      CONSTANT DATE := holiday_observed(TO_DATE('25-DEC-'||TO_CHAR(in_date,'YYYY'),'DD-MON-YYYY'));
+
+
+  FUNCTION next_business_day(in_date IN DATE)
+  RETURN DATE
+  IS
+    v_next_day DATE;
+
+  BEGIN
+    IF TO_CHAR(in_date,'fmDAY') IN ('FRIDAY','SATURDAY','SUNDAY') 
+    THEN
+      v_next_day := NEXT_DAY(in_date,'MONDAY');
+    ELSE
+      v_next_day := in_date + 1;
+    END IF;
+    
+    v_next_day := TRUNC(v_next_day);
+    --now, we have to check to see if v_next_day falls on a holiday
+
+    IF v_next_day IN (c_new_years_day, c_next_new_year, c_mlk_day, c_presidents_day,
+                      c_memorial_day,c_july_4, c_pioneer_day, c_labor_day,
+                      c_veterans_day,c_thanksgiving, c_christmas)
+    THEN
+  
+      v_next_day := next_business_day(v_next_day);
+    END IF;
+
+    RETURN TRUNC(v_next_day);
+
+  END next_business_day;
+
+  FUNCTION prior_business_day(in_date IN DATE)
+  RETURN DATE
+  IS
+    v_next_day DATE;
+  BEGIN
+    IF LTRIM(RTRIM(TO_CHAR(in_date,'DAY'))) IN ('SATURDAY','SUNDAY','MONDAY')
+    THEN
+      v_next_day := NEXT_DAY(in_date-7,'FRIDAY');
+    ELSE
+      v_next_day := in_date -1;
+    END IF;
+    --now, we have to check to see if v_next_day falls on a holiday
+
+    IF v_next_day IN (c_new_years_day, c_next_new_year, c_mlk_day, c_presidents_day,
+                      c_memorial_day,c_july_4, c_pioneer_day, c_labor_day,
+                      c_veterans_day,c_thanksgiving, c_christmas)
+    THEN
+      v_next_day := prior_business_day(v_next_day);
+    END IF;
+
+    RETURN TRUNC(v_next_day);
+
+  END prior_business_day;
+
+  FUNCTION add_business_days (in_date IN DATE, in_number_of_days IN NUMBER)
+  RETURN DATE
+  IS
+    v_return_date DATE := in_date;
+  BEGIN
+    FOR i IN 1..in_number_of_days
+    LOOP
+      v_return_date := next_business_day(v_return_date);
+    END LOOP;
+    RETURN v_return_date;
+  END;
+
+  FUNCTION first_weekday(in_date IN date,in_day_of_week IN VARCHAR2)
+  RETURN DATE
+  IS
+  BEGIN
+    IF LTRIM(RTRIM(TO_CHAR(in_date,'DAY'))) = UPPER(in_day_of_week)
+    THEN
+      RETURN in_date;
+    ELSE
+      RETURN(NEXT_DAY(in_date,in_day_of_week));
+    END IF;
+  END;
+
+  FUNCTION holiday_observed(in_holiday_dt IN DATE)
+  RETURN DATE
+  IS
+  BEGIN
+    --determine when to observe a holiday, using state government rules:
+    --if the holiday falls on a saturday, then we observe it on friday
+    --if the holiday falls on a sunday, then observe it on a monday    
+    IF TO_CHAR(in_holiday_dt,'fmDAY') = 'SATURDAY'
+    THEN
+      --use the prior friday
+      RETURN TRUNC(in_holiday_dt) -1;
+
+    ELSIF TO_CHAR(in_holiday_dt,'fmDAY') = 'SUNDAY'
+    THEN
+      --use the next monday
+      RETURN TRUNC(in_holiday_dt) + 1;
+    ELSE
+      RETURN in_holiday_dt;
+    END IF;
+  END;
+
+[/sql]

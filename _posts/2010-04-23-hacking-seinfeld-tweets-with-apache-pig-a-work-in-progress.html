@@ -1,0 +1,116 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: Hacking Seinfeld Tweets with Apache Pig - A work in progress
+---
+As some of you know, my twitter bot <a href="http://www.twitter.com/hellooooonewman">@hellooooonewman</a> responds to every tweet containing the word/hashtag 'Seinfeld'.  Using Python and the Twitter Search REST API, it looks for mentions and then replies to the original author with a random Seinfeld quote.  People seem to get a kick out of it, judging by its 2,000 followers in about a month's time.
+
+What most don't realize is that I'm capturing data each time my program finds a search result.  I capture:
+<ul>
+	<li>Time of day the tweet was received (in California time, currently PDT)</li>
+	<li>Tweet ID of the tweet</li>
+	<li>The author of the tweet</li>
+	<li>The tweet itself</li>
+	<li>The reply sent back to the original author</li>
+</ul>
+In a quest to become a former Oracle DBA(not that there's anything wrong with that!) and move into working with big data, Hadoop, etc, I've been spending a lot of time working with <a title="Apache Pig" href="http://hadoop.apache.org/pig/" target="_blank">Apache Pig</a>, the tool I have currently chosen to analyze large data sets.   After running through the tutorial programs, I thought I would try my hand at some of my own queries.  Here are a few results.
+
+Warning: I went after some seriously low-hanging fruit for these experiments
+
+Using data collected 21-Mar-2010 through 23-Apr-2010, I've captured 21,000* tweets about Seinfeld.
+
+*Yes I know this isn't "Big Data", I'm just screwing around.
+
+First thing I wanted to find out was what time of the day, specifically what hour were people tweeting about Seinfeld.    Using SQL, this would have been a no-brainer
+
+[sql]
+  select  to_char(timestamp,'HH') hour
+       ,  count(*)
+    from  seinfeld_tweets
+group by  to_char(timestamp,'HH')
+order by  to_char(timestamp,'HH');
+[/sql]
+
+Easy enough, right?  Fortunately, doing the same in Pig isn't all that bad.  The big whoa-moment (Think Keanu Reeves in The Matrix)  when using Pig is realizing that the grouping and aggregation take place in different steps.  Coming from a strong SQL background, that's just weird.
+
+Since I haven't really mastered Pig's date-handling, I cheated by just using SUBSTRING() to capture the hour of the tweet.  A few helpful folks in the Cloudera irc channel told me that Pig's date-handling functionality is still pretty rough, I decided to take the easy way out so that I can stick with the core learning, and not be fighting with built-in functions that don't work entirely as they should.
+
+The equivalent Pig code is
+
+[text]
+A = load '/Users/neil/seinfeld.log' using PigStorage('\t') as (timestamp:chararray,bot:chararray,id:chararray,author:chararray,tweet:chararray,response:chararray);
+B = FOREACH A GENERATE author, org.apache.pig.piggybank.evaluation.string.SUBSTRING(timestamp,11,13) as hr;
+grpd = GROUP B by hr;
+cntd = FOREACH grpd GENERATE $0,COUNT(B);
+[/text]
+
+Not too bad, Line 1 loads the Seinfeld log into A, Line 2 extracts the author of the tweet and the Hour. Line 3 groups by the value of hour, line 4 computes the tweets per hour.  I didn't have to sort the data because the output was already sorted in the order I wanted.  This was unexpected.  I dont know if I got lucky or this is desired behavior.  A stark difference from Oracle where you can never really expect any order to your data, even aggregates, unless you include an ORDER BY clause.
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/04/Seinfeld-Tweets1.png"><img class="alignnone size-large wp-image-205" title="Seinfeld Tweets" src="http://www.neilkodner.com/wp-content/uploads/2010/04/Seinfeld-Tweets1-1024x768.png" alt="" width="1024" height="768" /></a>
+
+Unscientifically, people tend to tweet more about Seinfeld as the day goes on.  The times used in the raw data is the time I captured each seinfeld tweet and not really when the tweet was sent, although I estimate to never be more than ten or 15 seconds behind.  I would like to modify my program to incorporate time-zones.
+
+The second test was to see just who is tweeting about Seinfeld.  Out of about 216e2 tweets (a nod to my hero <a href="http://www.twitter.com/mat_kelcey">@mat_kelcey</a>) we had 15,260 distinct users mentioning Seinfeld.
+
+The SQL code to generate this data is similar to the hour-of-the-day query above:
+
+[sql]
+  select  author
+       ,  count(*)
+    from  seinfeld_tweets
+group by  author
+order by  count(*);
+[/sql]
+
+The Pig code used is equally similar:
+
+[text]
+usrs = GROUP A by author;
+cntd = FOREACH usrs GENERATE $0 as user,COUNT(A) as cnt;
+srtd= ORDER cntd BY cnt;
+[/text]
+
+This time, I explicitly wanted to sort by the # of tweets for each user so I added the ORDER command.
+
+According to R,  that's not terribly exciting data
+
+[text]
+&gt; summary(srtd$frequency)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+  1.000   1.000   1.000   1.417   1.000  97.000
+[/text]
+
+Fine, lets take a look at the top 100 Seinfeld-tweeters
+
+[text]
+&gt; last&lt;-tail(srtd,100)
+&gt; summary(last$frequency)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+   9.00   10.00   14.00   18.23   20.00   97.00
+[/text]
+
+Still not terribly interesting, maybe to me, anyway.  We know that most people have about 1 tweet, lets see who the big Seinfeld-tweeters were for the last month or so:
+
+[text]
+&gt; tail(last)
+               author frequency
+15255          nuoptv        45
+15256 OctavioCalegari        48
+15257    AceCostaRica        51
+15258       sony_prog        58
+15259       ZDFneo_TV        60
+15260     kaptainmyke        97
+[/text]
+
+I saved you the work of looking at the profile pages, and saved myself the work of hyperlinking to each profile.  Looks like @kaptainmyke is trying to sell us something, so he doesn't count.  @ZDFneo_TV and @sony_prof are both bots, so the winner of the March-April Seinfeld-tweet-off is <a href="http://www.twitter.com/AceCostaRica">@AceCostaRica</a> with 51 tweets.
+
+In order to advance my Pig skills, I will continue the experimentation throughout the next few days.  One of the things I'm really liking about Pig is that since each step gets its own name, they can be reused as part of an overall larger process, I'll try and work in some examples.
+
+More interesting results to come.  I spent way too much time futzing around with ggplot2 trying to produce charts that didn't make this post; I could have been doing more with Pig.  Such is the nature of tinkering.

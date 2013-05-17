@@ -1,0 +1,42 @@
+--- 
+meta: 
+  syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- oracle
+- plsql
+- sql
+layout: post
+published: true
+title: Process the whole world, or just one item
+---
+One of my favorite PL/SQL techniques used in batch job development is to add an extra parameter, default it to NULL, so that I can test a single account at a time.  
+
+example
+[sql]
+CREATE PROCEDURE bill_employers(in_employer_id DEFAULT NULL)
+IS
+BEGIN
+  FOR employer in
+    SELECT  emp.employer_id
+         ,  emp.account_number
+         ,  emp.bill_amt
+      FROM  employer emp
+     WHERE  emp.employer_id = NVL(in_employer_id,emp.employer_id)
+  LOOP
+    --Do stuff here
+  END LOOP;
+END;
+[/sql]
+
+So the real trick is the NVL in the where clause - If I supply a value for in_employer_id that's the only one that'll get processed.  
+[sql]
+exec bill_employers(in_employer_id =&gt; 12345);
+[/sql]
+
+If I don't pass a value at all, we'll process the whole set because of the NVL - if in_employer_id is NULL, then the rvalue becomes the same as the lvalue.
+[sql]
+exec bill_employers;
+[/sql]

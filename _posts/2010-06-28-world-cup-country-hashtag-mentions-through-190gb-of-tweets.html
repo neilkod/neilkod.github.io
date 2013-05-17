@@ -1,0 +1,63 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: World Cup Country hashtag mentions through 190gb of tweets
+---
+Since the beginning of the 2010 World Cup, I've been saving tweets from the twitter gardenhose and trying to find interesting things in the data.  Here is a histogram showing the count of mentions for each country's hashtag.  With apologies for my lack of effort in ggplot2:
+
+<a href="http://www.neilkodner.com/images/littlesnapper/country_hashtags.png"><img class="alignnone" title="World Coup country hashtags" src="http://www.neilkodner.com/images/littlesnapper/country_hashtags.png" alt="" width="1145" height="650" /></a>
+
+Even though my raw data was sorted by the counts, it appears that the default behavior of ggplot2 (or at least qplot) is an alphabetical sort.  Maybe one of you could help me wi this.  Source data is below.
+
+Since my magnficient 2-node hadoop cluster consisting of my MacBook Pro, an old beat-up MacBook and a wireless connection isn't quite mighty enough, I generated these numbers the old-fashioned way- through the command line.  I'm sitting on too much unprocessed data to send to Amazon S3 for EMR.  After I preprocess the tweets, the size will drastically reduce and I can then send the data to Amazon for further processing.
+
+[shell]
+cat *.json|grep -iPo &quot;#(usa|mex|hon|bra|par|chi|arg|uru|alg|civ|gha|nga|cmr|rsa|prk|jpn|kor|aus|nzl|eng|fra|esp|por|ned|den|ger|sui|ita|svk|svn|srb|gre)\b&quot;|tr '[:upper:]' '[:lower:']|sort|uniq -c|sort -rg
+
+[/shell]
+<pre><!--more-->
+[text]
+country count
+bra 517577
+arg 157524
+usa 153661
+mex 144108
+eng 126073
+ger 123713
+esp 86458
+chi 85301
+jpn 79508
+por 72340
+ita 52830
+gha 52193
+uru 49694
+kor 39671
+civ 36957
+ned 33231
+fra 31511
+prk 29758
+rsa 24705
+sui 24194
+nzl 21690
+den 21273
+hon 20621
+par 18518
+aus 16247
+gre 16243
+srb 14552
+alg 14017
+svk 12867
+cmr 12864
+svn 12350
+nga 10224
+[/text]
+
+</pre>

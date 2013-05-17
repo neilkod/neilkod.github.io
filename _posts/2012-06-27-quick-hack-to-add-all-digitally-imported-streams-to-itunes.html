@@ -1,0 +1,19 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: draft
+type: post
+tags: []
+
+layout: post
+published: false
+title: Quick hack to add all Digitally Imported streams to iTunes
+---
+here's a quick hack to download all of di.fm's 96k mp3 playlists to itunes
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2012/06/iTunes-internet-songs.png"><img class="alignnone size-large wp-image-632" title="iTunes internet songs  -before" src="http://www.neilkodner.com/wp-content/uploads/2012/06/iTunes-internet-songs-1024x632.png" alt="" width="1024" height="632" /></a>
+
+[code]curl -s http://www.di.fm|grep &quot;96k Broadband&quot;|awk -F\&quot; '{print $2}'|xargs -I {} curl -Os {};open *.pls[/code]
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2012/06/iTunes-after.png"><img class="alignnone size-large wp-image-633" title="iTunes-after" src="http://www.neilkodner.com/wp-content/uploads/2012/06/iTunes-after-902x1024.png" alt="" width="902" height="1024" /></a>

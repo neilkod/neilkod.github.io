@@ -1,0 +1,104 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- analysis
+- awk
+- curl
+- data
+- freebase
+layout: post
+published: true
+title: Fun with awk and dead people
+---
+Just playing around with some <a href="http://www.freebase.com">Freebase</a> data in preparation for a 'who died today' twitter bot.
+
+<strong>Get the data and determine on which date did the most people die?</strong>
+
+[bash]
+
+hadoop3:Downloads nkodner$ curl -O &quot;http://download.freebase.com/datadumps/latest/browse/people/deceased_person.tsv&quot;
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 16.3M  100 16.3M    0     0   209k      0  0:01:19  0:01:19 --:--:--  248k
+hadoop3:Downloads nkodner$ awk -F'\t' '{print $4}' deceased_person.tsv|grep &quot;-&quot;|sort|uniq -c|sort -n|tail -11|head
+  22 2008-01-03
+  22 2008-02-21
+  22 2008-05-20
+  23 1989-06-07
+  23 2009-01-13
+  24 2009-01-11
+  26 2009-04-03
+  27 1912-04-15
+  63 2001-09-11
+  65 1965-11-08
+[/bash]
+
+Surprised to see 1965-11-08 listed ahead of 2001-09-11. Why? <strong>Lets look at where people died on 1965-11-08</strong>:
+
+[bash]
+hadoop3:Downloads nkodner$ grep &quot;1965-11-08&quot; deceased_person.tsv |awk -F'\t' '{print $5}' |sort|uniq -c|sort -n
+   1 Kenton County
+   1 Latium
+   1 Leicester
+   1 New York City
+   1 Toronto
+   3
+  57 American Airlines Flight 383 Crash Site
+
+[/bash]
+
+Upon further investigation, it looks as if Freebasers have set up a <a href="http://www.freebase.com/view/base/americanairlinesflight383/views/victims_of_aa_flight_383">Victims of AA Flight 383 page</a>, containing info on the deceased. Works for me.
+
+<strong>How about which month/year did the most people die on?</strong>
+
+[bash]
+hadoop3:Downloads nkodner$ awk -F'\t' '{print $4}' deceased_person.tsv|grep &quot;-&quot;|awk -F'-' '{print $2&quot;-&quot;$3}'|sort|uniq -c|sort -n|tail -11|head
+ 668 02-08
+ 668 03-06
+ 672 01-06
+ 673 02-11
+ 676 01-28
+ 677 01-10
+ 683 01-04
+ 692 12-31
+ 702 01-22
+ 752 02-02
+[/bash]
+
+<strong>Method of death?</strong>
+
+[bash]
+hadoop3:Downloads nkodner$ awk -F'\t' '{print $3}' deceased_person.tsv|sort|uniq -c|sort -n|tail -11|head
+ 505 Cardiovascular disease
+ 603 Tuberculosis
+ 742 Assassination
+ 745 Stroke
+ 799 Pneumonia
+ 832 Lung cancer
+ 913 Murder
+1618 Suicide
+1978 Cancer
+2503 Myocardial infarction
+[/bash]
+
+<strong>And finally, the most common names of the deceased people listed on Freebase</strong>
+
+[bash]
+hadoop3:Downloads nkodner$ awk -F '\t' '{print $1}' deceased_person.tsv |sort|uniq -c|sort -n|tail -11|head
+  21 William Anderson
+  23 John White
+  25 John Campbell
+  25 John Wilson
+  29 George Smith
+  30 John Anderson
+  32 William Smith
+  34 John Williams
+  35 John Taylor
+  36 John Smith
+[/bash]
+
+Nothing too deep today, maybe this data might be worth a closer look in R someday.

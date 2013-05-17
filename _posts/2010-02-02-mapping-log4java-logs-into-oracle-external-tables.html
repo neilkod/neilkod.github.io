@@ -1,0 +1,115 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: Mapping log4java logs into Oracle External Tables
+---
+To troubleshoot a pesky java-in-the-database issue at one of my sites, I loaded the log4j jar into the Oracle JVM.  We configured the log to write to a file on the local filesystem.  I then thought it would be nice to be able to monitor the log from the database using SQL and some existing reporting/BI services, rather than monitoring a log file on the fs.
+
+First, I created a database directory so that Oracle has access to the log file:
+
+[sql]
+
+create directory log4j_dir as '/u00/app/oracle/admin/java_logs';
+
+[/sql]
+
+Then, a basic external table which treats each line as a record.  Out of laziness(which is a good thing, remember) I didn't want to parse the individual fields out in the external table definition since I'm much more comfortable using SQL.
+
+[sql]
+create table
+   log4j_ext ( msg varchar2(512) )
+organization external (
+   type oracle_loader
+   default directory log4j_dir
+   access parameters (
+      records delimited by newline nologfile fields(msg char(1024))
+   )
+   location('java.log')
+);
+[/sql]
+
+So now we can query the log4j log directly from the database
+[sql]
+SQL&gt; select * from log4j_ext where rownum &lt;=10;
+
+MSG
+-------------------------------------------------------------------------------------------------
+02/02/2010 12:53:32.036 DEBUG [HttpClient] - Java version: 1.4.2_04
+02/02/2010 12:53:32.036 DEBUG [HttpClient] - Java version: 1.4.2_04
+02/02/2010 12:53:32.071 DEBUG [HttpClient] - Java vendor: Oracle Corporation
+02/02/2010 12:53:32.071 DEBUG [HttpClient] - Java vendor: Oracle Corporation
+02/02/2010 12:53:32.072 DEBUG [HttpClient] - Java class path:
+02/02/2010 12:53:32.072 DEBUG [HttpClient] - Java class path:
+02/02/2010 12:53:32.073 DEBUG [HttpClient] - Operating system name: Solaris
+02/02/2010 12:53:32.073 DEBUG [HttpClient] - Operating system name: Solaris
+02/02/2010 12:53:32.074 DEBUG [HttpClient] - Operating system architecture: sparc
+02/02/2010 12:53:32.074 DEBUG [HttpClient] - Operating system architecture: sparc
+
+10 rows selected.
+[/sql]
+
+Now we can at least view see the contents of the log.  A good start but this introduces a few problems-we won't be able to easily sort the records, nor will we be able to limit the log contents by a particular period, process, log level, etc.  A little SQL will do the trick(output truncated and formatted for brevity):
+[sql]
+select to_timestamp(substr(msg,1,23),'dd/mm/yyyy hh24:mi:ss.ff') timestamp
+     , substr(msg,instr(msg,' ',1,2)+1,instr(msg,' ',1,3)-instr(msg,' ',1,2)-1) log_level
+     , replace(replace(substr(msg,instr(msg,' ',1,3)+1,instr(msg,' ',1,4)-instr(msg,' ',1,3)-1),'['),']') process     
+     , substr(msg,instr(msg,' ',1,5)+1,length(msg)-instr(msg,' ',1,5)) message
+  from log4j_ext order by timestamp;
+[/sql]
+
+gives us results like like the following
+[sql]
+TIMESTAMP                           LOG_LEVEL  PROCESS         MESSAGE
+----------------------------------- ---------- --------------- ------------------------------------------------------------
+02-FEB-10 12.53.32.036000000 PM     DEBUG      HttpClient      Java version: 1.4.2_04
+02-FEB-10 12.53.32.036000000 PM     DEBUG      HttpClient      Java version: 1.4.2_04
+02-FEB-10 12.53.32.071000000 PM     DEBUG      HttpClient      Java vendor: Oracle Corporation
+02-FEB-10 12.53.32.071000000 PM     DEBUG      HttpClient      Java vendor: Oracle Corporation
+02-FEB-10 12.53.32.072000000 PM     DEBUG      HttpClient      Java class path:
+02-FEB-10 12.53.32.072000000 PM     DEBUG      HttpClient      Java class path:
+02-FEB-10 12.53.32.073000000 PM     DEBUG      HttpClient      Operating system name: Solaris
+02-FEB-10 12.53.32.073000000 PM     DEBUG      HttpClient      Operating system name: Solaris
+02-FEB-10 12.53.32.074000000 PM     DEBUG      HttpClient      Operating system architecture: sparc
+02-FEB-10 12.53.32.074000000 PM     DEBUG      HttpClient      Operating system architecture: sparc
+02-FEB-10 12.53.32.075000000 PM     DEBUG      HttpClient      Operating system version: 5.9
+02-FEB-10 12.53.32.075000000 PM     DEBUG      HttpClient      Operating system version: 5.9
+02-FEB-10 12.53.32.167000000 PM     DEBUG      HttpClient      SUN 1.42: SUN (DSA key/parameter generation; DSA signing; SH
+02-FEB-10 12.53.32.167000000 PM     DEBUG      HttpClient      SUN 1.42: SUN (DSA key/parameter generation; DSA signing; SH
+02-FEB-10 12.53.32.170000000 PM     DEBUG      HttpClient      SunJSSE 1.41: Sun JSSE provider(implements RSA Signatures, P
+02-FEB-10 12.53.32.170000000 PM     DEBUG      HttpClient      SunJSSE 1.41: Sun JSSE provider(implements RSA Signatures, P
+02-FEB-10 12.53.32.172000000 PM     DEBUG      HttpClient      SunJCE 1.42: SunJCE Provider (implements DES, Triple DES, AE
+02-FEB-10 12.53.32.172000000 PM     DEBUG      HttpClient      SunJCE 1.42: SunJCE Provider (implements DES, Triple DES, AE
+02-FEB-10 12.53.32.173000000 PM     DEBUG      HttpClient      SunJGSS 1.0: Sun (Kerberos v5)
+02-FEB-10 12.53.32.173000000 PM     DEBUG      HttpClient      SunJGSS 1.0: Sun (Kerberos v5)
+
+20 rows selected.
+[/sql]
+
+From now, we can perform any sort of summary or aggregate - for instance, here is a hourly summary, including exceptions and warnings
+[sql]
+  select  trunc(timestamp,'HH') &quot;hour&quot;
+       ,  count(*) &quot;messages&quot;
+       ,  count(distinct process) &quot;distinct processes&quot;
+       ,  sum(case when message like '%Exception%' then 1 else 0 end) &quot;exceptions&quot;
+       ,  sum(case when message like '%Warning%' then 1 else 0 end) &quot;warnings&quot;
+    from  log4j_output
+group by  trunc(timestamp,'HH')
+order by  trunc(timestamp,'HH')
+/
+hour                      messages distinct processes exceptions   warnings
+----------------------- ---------- ------------------ ---------- ----------
+02-feb-2010 01:00:00 am       6740                 12          0          0
+02-feb-2010 02:00:00 am       6759                 12          0          0
+02-feb-2010 03:00:00 am      11500                 12          0          0
+02-feb-2010 04:00:00 am      12083                 12          0          0
+02-feb-2010 05:00:00 am       7211                 12          0          0
+02-feb-2010 12:00:00 pm        475                 12          0          0
+
+[/sql]

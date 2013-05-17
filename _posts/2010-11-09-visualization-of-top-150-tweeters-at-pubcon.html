@@ -1,0 +1,25 @@
+--- 
+meta: 
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: Visualization of top 150(now 300!) tweeters at pubcon
+---
+I built <a href="http://www.pubcontweets.com">http://www.pubcontweets.com</a> to track the tweets about pubcon, a social media conference that's being held in Las Vegas.  A little python and twitter api, sprinked in with some Gephi yields the intra-network connections of the 150 users with the most #pubcon posts.  The visualization is in svg format - make sure you use your browser's zoom feature to see the smaller nodes.
+
+[caption id="" align="alignnone" width="595" caption="Visualization of the twitter networks of the top 150 pubcon tweeters"]<img title="visualization of the network top 150 pubcon-tweeters" src="http://www.neilkodner.com/pubcontop150.svg" alt="" width="595" height="600" />[/caption]
+
+The size of the node indicates their <a href="http://en.wikipedia.org/wiki/Indegree#Indegree_and_outdegree">in-degree</a>, which represents the number of pubcon-tweeters that that follow a given user.  The color, from light-to-dark, represents the <a href="http://en.wikipedia.org/wiki/Indegree#Indegree_and_outdegree">out-degree</a> - the number of users within the community that they themselves follow.
+
+Note that the degree does not represent the total number of followers/friends pertaining to each node - rather, it's the connectedness within the group I extracted.  I'd like to run the visualization on a larger group of users, perhaps 300 or so, but due to rate limiting, I have to wait ten seconds between each twitter api query.
+
+None of this would have been possible without the help and inspiration of <a href="http://twitter.com/#!/psychemedia">@psychmedia</a> and his excellent blog, <a href="http://blog.ouseful.info/">OUseful.info</a>.    His Gephi Tutorials have been a tremendous inspiration - I encourage all of you to follow him on twitter and subscribe to his blog.
+
+<strong>Edit</strong>, here are the top 300 twitter-ers at pubcon 2010.  I'm going to try and run some numbers on an even larger piece of the pubcon network.  Make sure you use your browser's zoom feature to view the image in more detail.
+
+[caption id="" align="alignnone" width="595" caption="The connected-ness of the top 300 pubcon twitter-ers"]<a href="http://www.neilkodner.com/pubcontop300.svg"><img class=" " title="top 300 pubcon twitter-ers" src="http://www.neilkodner.com/pubcontop300.svg" alt="" width="595" height="705" /></a>[/caption]

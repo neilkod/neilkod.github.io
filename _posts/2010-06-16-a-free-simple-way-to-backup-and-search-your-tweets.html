@@ -1,0 +1,57 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: A free, simple way to backup and search your tweets
+---
+Edit: I'm not sure why wordpress decided to resize some of my pictures, please <a href="http://www.twitter.com/neilkod">let me know</a> how to avoid this.
+
+It's not like Twitter is going to <a href="http://www.wired.com/epicenter/2009/01/magnolia-suffer/">go all Ma.gnolia on us and lose all of our dat</a>a but here's a way to back up and search through your prior tweets. I've been using this September of last year and it seems to work really well.  You can even save others' tweets, provided their timeline is public.
+
+<a title="Yahoo Alerts" href="http://alerts.yahoo.com/">Yahoo Alerts</a>, a free email and SMS notification service has a useful option send an alert whenever a RSS Feed is updated.  Not surprisingly, each of our twitter streams has its own RSS feed.  Combining the two, we can create a process that, behind-the-scenes, sends each tweet to our gmail(or wherever) accounts.
+
+First, a new alert has to be created.  Make sure you choose <strong>Feed/Blog</strong> as the alert type:
+
+<a href="http://www.neilkodner.com/images/littlesnapper/create%20feed/Blog%20alert.png"><img class="alignnone" title="Creating a blog alert Feed" src="http://www.neilkodner.com/images/littlesnapper/create%20feed/Blog%20alert.png" alt="" width="832" height="521" /></a>
+
+Then, for the feed's URL, enter
+
+[text]http://twitter.com/statuses/user_timeline/neilkod.rss[/text]
+
+<strong>replacing my twitter username(neilkod) with your own.</strong> I chose to have the alert sent to my gmail account and use the <strong>+twitterbackup suffix</strong> as an identifier.  I chose to have the alerts sent as they're created.
+
+[caption id="" align="alignnone" width="948" caption="filter options"]<a href="http://www.neilkodner.com/images/littlesnapper/createAlert.png"><img title="filter options" src="http://www.neilkodner.com/images/littlesnapper/createAlert.png" alt="" width="948" height="970" /></a>[/caption]
+
+We're halfway there.  Now to organize the filters.  We can create a custom gmail filter that looks for messages sent from Yahoo that use our special suffix, twitterbackup in this example.
+
+<a href="http://www.neilkodner.com/images/littlesnapper/create%20gmail%20filter.png"><img class="alignnone" title="create a gmail filter" src="http://www.neilkodner.com/images/littlesnapper/create%20gmail%20filter.png" alt="create a gmail filter" width="1095" height="343" /></a>
+
+In my case, I chose to have the label TwitterBackup applied, mark the message as read, and archive it.
+
+<img class="alignnone" title="filter settings" src="http://www.neilkodner.com/images/littlesnapper/filter%20settings.png" alt="gmail filter settings" width="1092" height="395" />
+
+So now, all of our tweets are silently loaded into our gmail account, easily retrieved if we ever need them.  This is helpful because Twitter's search only goes back so far.
+
+From there, searching is just a matter of looking for keywords within a certain label.  Let's search for skate:
+
+<img class="alignnone" title="skate search" src="http://www.neilkodner.com/images/littlesnapper/skate%20search.png" alt="skate search" width="861" height="627" />
+
+And here is the message detail.  You get some of the typical yahoo 'noise' at the end of the email, but hey, it's free!
+
+<img class="alignnone" title="skate search result" src="http://www.neilkodner.com/images/littlesnapper/skatesearchresult.png" alt="skate search result" width="1059" height="818" />
+
+And finally, back to the original tweet, with apologies to <a href="http://www.twitter.com/iamjameshall">@IamJamesHall</a>
+
+<a href="http://twitter.com/neilkod/statuses/4835222255">http://twitter.com/neilkod/statuses/4835222255</a>
+
+Which is especially nice because twitter search has no recollection of me ever mentioning skate, especially not way back in October of 2009!(but hey, at least its fast!).
+
+<img class="alignnone" title="twitterskatesearch" src="http://www.neilkodner.com/images/littlesnapper/twittersearch.png" alt="twitterskatesearch" width="791" height="248" />
+
+I'd eventually like to port this to use Yahoo Pipes rather than Google Alerts to receive the data in a more concise format, but this method gets the job done.

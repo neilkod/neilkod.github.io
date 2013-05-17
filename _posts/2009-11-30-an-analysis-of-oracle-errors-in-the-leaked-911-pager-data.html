@@ -1,0 +1,102 @@
+--- 
+meta: 
+  syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+status: publish
+type: post
+tags: 
+- oracle
+- python
+- regex
+- regexp
+layout: post
+published: true
+title: An analysis of Oracle errors in the leaked 9/11 Pager Data
+---
+Yes, you read that correctly.  Here's how it started:
+
+I'm working on some text analysis in Python and was looking for some test data.  Someone recommended I use the <a href="http://911.wikileaks.org/">9/11 Pager Data from Wikileaks</a>.  I downloaded the data, ran my program against it (which is the subject of another post) and all was well.  Got some great insight and I'll share that later.
+
+I then started browsing the raw data in vi.  After paging down a few times, what did I see?
+
+<img src="http://www.neilkodner.com/wp-content/uploads/2009/11/oracle-error.jpg" alt="oracle error" title="oracle error" width="808" height="48" class="alignnone size-full wp-image-85" />
+
+Paging down some more yielded this gem:
+
+<img src="http://www.neilkodner.com/wp-content/uploads/2009/11/another-error.jpg" alt="another error" title="another error" width="849" height="143" class="alignnone size-full wp-image-88" />
+
+The gears are now spinning...
+<a href="http://twitter.com/neilkod/status/6219088850"><img src="http://www.neilkodner.com/wp-content/uploads/2009/11/dork.jpg" alt="dork" title="dork" width="584" height="185" class="alignnone size-full wp-image-101" /></a>
+
+I wondered how many of these Oracle errors polluted the NYC messaging system.  Lets find out - Python to the rescue!
+
+[text]
+Error		Frequency		Description
+ORA-00255	1	error archiving log %s of thread %s, sequence # %s
+ORA-00333	1	redo log read error block %s count %s
+ORA-00334	1	archived log: '%s'
+ORA-01035	1	ORACLE only available to users with RESTRICTED SESSION privilege
+ORA-01089	1	immediate shutdown in progress - no operations are permitted
+ORA-01401	1	inserted value too large for column
+ORA-01410	1	invalid ROWID
+ORA-01652	1	unable to extend temp segment by %s in tablespace %s
+ORA-01722	1	invalid number
+ORA-02050	1	transaction %s rolled back, some remote DBs may be in-doubt
+ORA-02068	1	following severe error from %s%s
+ORA-03114	1	not connected to ORACLE
+ORA-1146	1	cannot start online backup - file %s is already in backup
+ORA-12154	1	TNS:could not resolve the connect identifier specified
+ORA-1534	1	rollback segment '%s' doesn't exist
+ORA-1537	1	cannot add file '%s' - file already part of database
+ORA-1553	1	MAXEXTENTS must be no smaller than the %s extents currently allocated
+ORA-1593	1	command no longer valid, see ALTER USER
+ORA-19502	1	write error on file \&quot;%s\&quot;, blockno %s (blocksize=%s)
+ORA-20012	1	User-defined
+ORA-24324	1	service handle not initialized
+ORA-27063	1	number of bytes read/written is incorrect
+ORA-7445	1	exception encountered: core dump [%s] [%s] [%s]
+ORA-00312	2	online log %s thread %s: '%s'
+ORA-10		2	no data found
+ORA-11		2	invalid value %s for attribute %s, must be between %s and %s
+ORA-16038	2	log %s sequence# %s cannot be archived
+ORA-20000	2	The stored procedure 'raise_application_error'
+ORA-301		2	error in adding log file '%s' - file cannot be created
+ORA-959		2	tablespace '%s' does not exist
+ORA-00060	3	deadlock detected while waiting for resource
+ORA-07445	3	exception encountered: core dump [%s] [%s] [%s]
+ORA-12012	3	error on auto execute of job %s
+ORA-00600	4	internal error code, arguments: [%s], [%s], [%s]
+ORA-1652	4	unable to extend temp segment by %s in tablespace %s
+ORA-00917	10	missing comma
+ORA-01013	12	user requested cancel of current operation
+ORA-1650	12	unable to extend rollback segment %s by %s in tablespace %s
+ORA-20011	21	User-defined error: Execute_system: Err
+ORA-1142	33	cannot end online backup - none of the files are in backup
+[/text]
+
+Final analysis?  Where can I send my resume? 
+
+The Python code is simple - it loops through each line of the 49MB file (448k lines) and checks for an Oracle error using the regexp ORA-[0-9]{1,5} which I intended to mean the letters ORA, followed by a dash, followed by between one and five numbers.  Please feel free to correct/improve my regex-fu.  If a match is found, then add it to a dictionary as the key, and set the value to the count.  If the key is already present in the dictionary, the value gets incremented.  Finally, the contents of the dictionary are displayed, sorted by the value(frequency).
+
+[python]
+#!/usr/bin/python
+import re
+f=open('messages_all.txt')
+
+pattern = re.compile(r'ORA-[0-9]{1,5}')
+errors={}
+for line in f:
+	err = re.findall(pattern,line)
+	if err:
+		errors[err[0]] = errors.get(err[0],0)+1
+f.close()
+
+for k,v in sorted(errors.items(), key=lambda(k,v):(v,k)):
+	print '%s\t%d' % (k,v)
+
+[/python]
+
+
+
+
+

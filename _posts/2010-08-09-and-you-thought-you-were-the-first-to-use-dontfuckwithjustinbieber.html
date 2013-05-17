@@ -1,0 +1,346 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: 
+- analysis
+- data
+- funny
+- hadoop
+- hashtag
+- pig
+- twitter
+layout: post
+published: true
+title: "And you thought you were the first to use #DONTFUCKWITHJUSTINBIEBER"
+---
+Through the magic of <a href="http://hadoop.apache.org/">hadoop</a>, <a href="http://hadoop.apache.org/pig">pig</a>, over 300 million(and counting) tweets, and the never-ending creativity of my fellow twitter users, I thought I'd take a look at all of the hashtags containing the beloved f-word.
+
+Lets get the technical details out of the way.  Since the middle of June, I've been saving as many tweets as I can to local storage, using Twitter's streaming API and my gardenhose access.  Sorry, <a href="http://www.cloudera.com">Cloudera</a> guys, I'm not yet using <a href="http://github.com/cloudera/flume">flume</a>, but it's high on the to-do list.  Using a 3-node cluster, I'm able to search through these tweets and extract valuable(?) data in a matter of minutes.
+
+The pig script(Sorry, looks like gist.github.com doesn't auto-format pig):
+<script src="http://gist.github.com/515641.js"></script>
+
+And now the fun stuff.  I found over 31,000 different hashtags containing the f-word.  Bonus to the first person who can tell me what GFW is.
+The top-ten results and the frequency of their mentions are:
+
+[code]
+#fuck	10406
+#fuckouttahere	3172
+#fuckinfollow	3062
+#fuckit	2970
+#fuckyou	2303
+#fuckgfw	1573
+#fuckyeah	1551
+#fuckery	1436
+#fucking	1273
+#fuckoff	988
+[/code]
+
+Lets move on to what's really important-celebrities, sports figures, and other important American topics:
+
+Lady Gaga
+
+[code]
+#dontfuckwiththegaga	11
+#fuckthegagahaters	4
+#fuckgaga	3
+#fuckladygaga	3
+#dontfuckwithgaga	2
+#fuckmegaga	2
+#fucktrannygaga	1
+[/code]
+
+<!--more-->
+
+Obama
+
+[code]
+#fuckobama	7
+#dontfuckwithobama	2
+#fuckyouobama	1
+#fuckbarackobama	1
+#fucking_twat_obama	1
+#obamabrieflymadefuckedmeover	1
+[/code]
+
+taxes
+
+[code]
+#fucktaxes	5
+#blackpeopleneverpaybillsfuckinuptaxescredit	1
+#fuckingtaxes	1
+[/code]
+
+The NY Yankees
+
+[code]
+#fucktheyankees	31
+#fuckyankees	3
+#fuckdayankees	1
+#fuckyouyankees	1
+[/code]
+
+The Red Sox
+
+[code]
+#fucktheredsox	2
+#fuckredsox	1
+#fuckredsoxfans	1
+#fucktheredsoxs	1
+#ifuckinghaaaateredsoxanddavidortizandhisslowfatassshouldveputarodinmaybewouldvewon	1
+#fucktheredsoxandanybodywhoplaysforthem	1
+[/code]
+
+Lakers
+
+[code]
+#fuckthelakers	279
+#fucklakers	65
+#teamfuckthelakers	48
+#fuckdalakers	39
+#fuckteamlakers	14
+#teamfuckdalakers	9
+#teamfuckinglakers	8
+#teamfucklakers	7
+#fuckyoulakers	6
+...
+#itsstillfucklakersalldayeverydaytillkoberetires	1
+#teamidontgiveafuckaboutlakersorcelticskickrockd	1
+#fuckdaflakers	1
+#fuckyealakers	1
+#fuckalakersfan	1
+#fucklakersssss	1
+#fucktheflakers	1
+#fuckyourlakers	1
+#fuckeverylakersfanonthegotdamnplanetcuztheyaintshitforeal	1
+[/code]
+
+Celtics
+
+[code]
+#fucktheceltics	43
+#fuckceltics	39
+#teamfuckceltics	16
+#fuckteamceltics	8
+#teamfucktheceltics	5
+#teammmmfuckingceltics	4
+#fuckdaceltics	3
+#teamfuckthecelticsandlakers	3
+#fuckthemceltics	3
+#fuckyouceltics	2
+...
+#fuckthelakersandceltics	1
+#fuckyourfeelingsceltics	1
+#teamcelticsallfuckingday	1
+#fuckthecelticsandthehaters	1
+#teamifuckinghatetheceltics	1
+#fuckthelakersfucktheceltics	1
+#teamfuckthecelticswith10dicks	1
+[/code]
+
+Lebron
+
+[code]
+#fucklebron	366
+#teamfucklebron	45
+#fucklebronjames	32
+#fuckyoulebron	18
+#fucklebronandhisdecision	16
+#fuckalebron	4
+#teamfucklebronjames	4
+#newyorksaysfucklebron	4
+#fuckyoutolebron	3
+#fucklebronforlife	2
+#fucklebronbitchass	2
+
+(many more)
+...
+#teamgetthefuckofflebrondickhalfofyalgotsummerschooldoyourhomeworkyoudickriders	1
+#fuckouttaherelebrons	1
+#fucklebronheabitchassniggaheisnotarealmanfaggotassbitchassdickridinassthatswhyhesecondtodwade	1
+[/code]
+
+Haters
+
+[code]
+#fuckthehaters	67
+#fuckhaters	25
+#fuckyouhaters	15
+#fuckinhaters	7
+#fuckjlshaters	6
+#fuckdahaters	6
+#demihatersfuck	4
+#fuckdemihaters	4
+[/code]
+
+Snitches
+
+[code]
+#fucksnitches	3
+#fuckinsnitches	1
+[/code]
+
+and finally, who could forget J-Bieb
+
+[code]
+#fuckyoubieberisafag	126
+#dontfuckwithjustinbieber	105
+#fuckjustinbieber	10
+#fuckbieber	10
+#bieberisafagshouldshutthefuckup	6
+#fuckyoubieber	6
+#teamfuckbieber	5
+#fuckoffbieberarmy	5
+#dontfuckwithbieber	5
+#biebersnewhaircutisfuckinsexysostfuitsjusthairitwillgrowbackgetafuckinlifebitches	4
+#whothefuckisjustinbieber	3
+#fuckingunfollowbieberarmy	3
+#dontfuckwithjustinbieberslegalbeliebers	3
+#ifuckbieber	2
+(many many more....)
+#fuckyeahjustinbiebermix	1
+#fuckinunfollowbieberarmy	1
+#ohmyfuckinjustinbiebergasm	1
+#fuckthattinylittlebieberfag	1
+#fuckyoubiebertyzasranyklamco	1
+#justinbieberisafuckingpussyshit	1
+#biebersafagshouldgetafuckinglife	1
+#fuckyouallthehatersofjustinbieber	1
+#ilovejustindrewbieberfuckwatucare	1
+#fuckjustinbieberbringfalloutboyback	1
+#whothefuckisstilltrendingjustinbieber	1
+#youstupidbieberhatersneedafuckinglife	1
+#fuckjustinbieberinhisstupidlookingbangs	1
+[/code]
+
+And how about those who can't spell Bieber?
+
+[code]
+#fuckbeiber	1
+#fuckyoubeiber	1
+#teamfuckbeiber	1
+#fuckjustinbeiber	1
+#dontfuckwithjustinbeiber	1
+#fuckinwiththatjustbeiber	1
+#justinbeibershouldgofuckhimself	1
+[/code]
+
+We've got geographic locations covered as well
+Jersey/New York/Philly
+
+[code]
+#fuckjerseyshore	22
+#fuckphilly	7
+#fucknewjersey	4
+#newyorksaysfucklebron	4
+#fuckthegirlswhomadejustincriedandrolledoffbackstageinnewjersey	3
+#teamfuckjerseyshore	3
+#jerseyfuckingshore	2
+#ifuckinglovenewyork	2
+#jerseyshoreisfulloffucks	2
+#fuckmarryorkill	2
+#fuckjersey	1
+#fatitalianmufuckawitthebeardfromsouthphilly	1
+#fucknewyork	1
+#fuckyouphilly	1
+#fuckmaryorkill	1
+#fuckyounewjersey	1
+#fuckjerseytransit	1
+#fuckthejerseyshore	1
+#ifuckinglovejersey	1
+#jerseyshorefuckery	1
+#fuckyounewyorkstate	1
+#fuckyouphillypeople	1
+[/code]
+
+France
+
+[code]
+#fuckfrance	13
+#fuckyoufrance	1
+[/code]
+
+Spain
+
+[code]
+#fuckspain	31
+#fuckyouspain	4
+#gofuckyourselfspain	3
+#doublefuckspain	3
+#teamfuckcaresboutspain	2
+#teamfuckinspain	2
+#fuckuspain	1
+#fuckingspain	1
+[/code]
+
+Work
+
+[code]
+#fuckwork	73
+#whenthefuckamiworkingnextcauseireallyneedsomemoneyasap	6
+#fuckyouwork	6
+#teamfuckwork	5
+#fuckfireworks	4
+#fuckcoworkers	3
+#fuckworking	3
+#fuckbuyinfireworksbuybullets	3
+#fuckingwork	3
+#fuckworkofart	3
+#fuckworktomorrow	3
+#fuckyocoworker	2
+#putthemfuckinheelsonandworkitgirl	2
+#fuckhomework	2
+#teamfucksleepgotoworktiredandstillgetthemoneyswag	2
+#teamboredasfucktonightcauseireallydontcareaboutfireworks	2
+#fuckgoingtowork	2
+#fuckinwork	1
+#fuckanetwork	1
+#fuckfirworks	1
+[/code]
+
+School
+
+[code]
+#fuckschool	80
+#fucksummerschool	11
+#teamfucksummerschool	10
+#teamfuckschool	5
+#schoolisfuckery	4
+#fuckhighschool	2
+#schoolfucksmylife	2
+#fuckhighschoolconfessions	2
+#fuckyouschool	2
+#fuckkkschool	1
+[/code]
+
+A great one suggested by my friend Ken
+
+Police
+
+[code]
+#fuckthepolice	388
+#fuckdapolice	102
+#fuckthapolice	26
+#teamfuckthepolice	8
+#fuckpolice	4
+#teamfuckdapolice	3
+#fuckdapolicetweet	2
+#fuckthepolice2010	2
+#policesayfuckofftomedia	2
+#fuck_the_police	1
+#fuckthepolicex3	1
+#fuckgrammarpolice	1
+#fuckthapoliceyeah	1
+[/code]
+
+Other observations:
+Many more mentions of math than science OR homework
+A few mentions of Lance but none of Contador
+
+The full dataset can be downloaded <a href="http://www.neilkodner.com/fwordhashtags.txt">here</a>.  The top ten thousand most frequently occurring hashtags can be found <a href="http://www.neilkodner.com/toptenkfwordhashtags.txt">here</a>.
+
+To-do: modify the pig script for variances of spelling the f-word, multiple u's, etc.  Maybe even a visualization.

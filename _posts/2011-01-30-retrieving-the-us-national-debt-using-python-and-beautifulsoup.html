@@ -1,0 +1,41 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: Retrieving the US National Debt and Population using Python and BeautifulSoup
+---
+<strong>Update 12-May-2011</strong>, I cleaned up the code, added logging of the data to a tab-delimited file, and published it to <a href="https://github.com/neilkod/national_debt">github</a>. Happy Hacking!
+
+Someone suggested I create a bot that tweets the <a href="http://en.wikipedia.org/wiki/United_States_public_debt">US National Debt</a>.  Here's how I'm retrieving the National Debt amount from the <a href="http://www.treasurydirect.gov">US Treasury</a> site.  I then retrieve the US Population from census.gov to figure out each person's share of the national debt.
+
+I present to you <a href="http://twitter.com/#!/usadebtlevel">@usadebtlevel</a>, my debt-tweeting bot.
+
+[python]
+from BeautifulSoup import BeautifulSoup
+import urllib2
+debt_url = 'http://www.treasurydirect.gov/NP/BPDLogin?application=np'
+page = urllib2.urlopen(debt_url)
+soup = BeautifulSoup(page)
+national_debt = soup.find('table',{'class':'data1'}).findAll('td')[3].text
+as_of = soup.find('table',{'class':'data1'}).findAll('td')[0].text
+
+population_url = 'http://www.census.gov/main/www/popclock.html'
+population_page = urllib2.urlopen(population_url)
+soup = BeautifulSoup(population_page)
+population = soup.find('span',{'id':'usclocknum'}).text
+debt_amount = float(national_debt.replace(',',''))
+population_amount = int(population.replace(',',''))
+per_person = debt_amount / population_amount
+print &quot;US National debt as of %s is %s, or %.2f for each person(%s) in the US&quot; % (as_of, debt,per_person,population)
+[/python]
+
+Output:
+
+[text]US National debt as of 01/27/2011 is 14,059,409,159,678.42, or 45064.71 for each person(311,982,692) in the US[/text]

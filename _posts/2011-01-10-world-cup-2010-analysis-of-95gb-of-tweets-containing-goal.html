@@ -1,0 +1,52 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: "World Cup 2010: Analysis of tweets celebrating goals"
+---
+The 2010 World Cup proved to be one of the most tweeted about events of 2010.  Through the millions of tweets saved to my local Cloudera CDH3 Hadoop cluster, I wrote a quick pig script to discover the ways that people are celebrating(ok, spelling) goals.  Here are the top few variations of Goal/Gol.  The full results can be found <a href="http://www.neilkodner.com/gooool.txt">here</a>.  I'm happy to share the Pig code if anyone is interested.
+
+[text]
+158636 gol
+126669 goal
+31722 Goal
+24735 Gol
+19610 GOL
+14317 GOAL
+4178 gool
+2981 ggol
+2219 goll
+1771 goool
+1641 GOOOL
+1564 Gooool
+1498 Goool
+1279 GOOOOL
+1188 Goooool
+1158 GOOOOOOOL
+1124 GOOOOOL
+1116 gooool
+1075 GOOL
+[/text]
+
+A few rough visualizations, they are in need of an update. The first is a scatter between the length of the GOAL and the number of Os contained. You'll see that a lot of excited soccer fans like to use the full 140 characters in their celebrations, often using 138 Os.  Huge thanks to <a href="http://www.twitter.com/johnmyleswhite">@johnmyleswhite</a> for the inspiration and the <a href="http://gist.github.com/447830">R/ggplot2 help</a>.  You don't even want to see my original version!
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/06/exponentialFunctionOfWordLength.png"><img class="alignnone size-medium wp-image-230" title="exponentialFunctionOfWordLength" src="http://www.neilkodner.com/wp-content/uploads/2010/06/exponentialFunctionOfWordLength-300x255.png" alt="Number of Os in GOAL vs GOAL length" width="300" height="255" /></a>
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/06/exponentialFunctionOfWordLength.png"></a> Inspired by <a href="http://www.twitter.com/peteskomoroch">@peteskomoroch</a>, who was inspired by the <a href="http://www.wired.com/geekdad/2009/01/khaaaaaan/">frequencies of the length of mentions of KAAAAAAHN!</a> here are the frequencies of the length of GOAL! celebrations found on twitter.
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/06/length-of-goooooallll-tweets.png"><img class="alignnone size-medium wp-image-233" title="length of goooooallll tweets" src="http://www.neilkodner.com/wp-content/uploads/2010/06/length-of-goooooallll-tweets-300x289.png" alt="" width="300" height="289" /></a>
+
+A visualization of the hashtag mentions by country through all of the World Cup Tweets.  Click for full-sized version.
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/06/countryHashtags.png"><img class="alignnone size-medium wp-image-245" title="countryHashtags" src="http://www.neilkodner.com/wp-content/uploads/2010/06/countryHashtags-300x149.png" alt="Counts of country hastags" width="300" height="149" /></a>
+
+And my personal favorite visualization, the number of tweets mentioning vuvuzela, hourly, during the course of the world cup.
+
+<a href="http://www.neilkodner.com/images/littlesnapper/vuvuzelatweets.png"><img class="alignnone" title="Vuvuzela tweets per hour" src="http://www.neilkodner.com/images/littlesnapper/vuvuzelatweets.png" alt="Vuvuzela tweets per hour" width="1146" height="533" /></a>

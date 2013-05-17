@@ -1,0 +1,131 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: 
+- analysis
+- api
+- canabalt
+- data
+- python
+- r
+- twitter
+layout: post
+published: true
+title: Visualizations of Canabalt scores scraped from twitter
+---
+<a href="http://www.canabalt.com/">Canabalt</a>, a ridiculously addicting web/IOS-device game allows one to show off their high scores, and their <a href="http://twitter.com/#!/neilkod/status/37964035903324160">not-so-high scores</a> to Twitter.
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2011/02/canabaltscore.png"><img class="alignnone size-medium wp-image-485" title="canabaltscore" src="http://www.neilkodner.com/wp-content/uploads/2011/02/canabaltscore-300x105.png" alt="" width="300" height="105" /></a>
+
+Each of these tweets contains a bit of information - The score represented in meters, the method of death (hitting a wall and tumbling to my death) and the device (iPhone). Other useful information can easily be extracted such as the date/time played and information about the user (name, location, friend count, follower count, etc). Over the next few weeks I aim to see what features, if any, has any influence on Canabalt scores.
+
+The first thing I needed to do was capture the tweeted Canabalt scores. I have a process running on an EC2 micro instance that downloads tweets from the Twitter Streaming API based on certain key words, one of them being canabalt. The process loads each matching tweet into a MongoDB instance hosted on <a href="http://www.mongohq.com">MongoHQ.com</a>.
+
+[bash]
+
+curl -s -u $TWITTER_USERNAME:$TWITTER_PASSWORD -d @/home/ec2-user/trackingkeywords http://stream.twitter.com/1/statuses/filter.json |/home/ec2-user/mongodb/bin/mongoimport &amp;
+
+[/bash]
+
+Where trackingkeywords is a file containing a comma-separated list of keywords that I track on twitter. Additionally, I left connection details out of the mongoimport command. You'll need to provide a host, port, database, and collection into the mongoimport command.
+
+I then run some python code to query the MongoDB instance and retrieve tweets mentioning Canabalt, based on a simple regular expression. I'm expecting the tweet to begin with 'I' and contain the word Canabalt. Pretty naive but it worked fine. If it's not a true Canabalt score, I'll be able to determine in no time. From there, I use regular expressions to extract(for now) the score, the method of death, and the device name.
+
+[python]
+def canabalt_tweets():
+
+	# connect to MongoDB
+	tweets = create_connection(False)
+
+	# regular expression to extract components of a canabalt score
+	canabalt_regexp = re.compile(r'I ran (\d{3,7})m before (.*) on my ([^.]+)\.')
+
+	# regular expression to match tweets that begin with I ran and mention canabalt
+	regexp = re.compile('^I ran .*canabalt')
+
+	# create a MongoDB cursor(query)
+	cur = tweets.conftweets.find({'text': regexp}, {'text': 1})
+
+	# iterate through the cursor. If a tweet fits the pattern, print it.
+	for item in cur:
+		try:
+			(score,death,device) = canabalt_regexp.search(item['text']).groups()
+			print ','.join([strip_text(score),strip_text(death),strip_text(device)])
+		except:
+			pass
+[/python]
+
+Function strip_text() is part of my data tools Bat-Utility Belt and cleans text by removing leading/trailing spaces, crlf, tabs and some other junk.
+
+We now have some comma-separated data in this shape
+
+[text]
+score,death,device
+2860,hitting a wall and tumbling to my death,iPhone
+3427,hitting a wall and tumbling to my death,iPad
+4496,hitting a wall and tumbling to my death,iPad
+3635,missing another window,iPhone
+2040,colliding with some enormous obstacle,iPhone
+6017,somehow hitting the edge of a billboard,iPhone
+8374,knocking a building down,iPhone
+2939,hitting a wall and tumbling to my death,iPad
+2021,turning into a fine mist,iPad
+[/text]
+
+Now for some more fun - visualization and analysis. This is performed in R because, well, R is awesome. That, and I really need some more practice with R.
+
+To date, I've collected just over 1200 Canabalt 'events'. I will likely turn this into a web app if there's enough interest.
+
+A couple of summaries:
+
+scores by device type:
+
+[text]
+      device count mean stddev median   max min range
+      iPhone   735 4491   3882 3419.0 36332 102 36230
+        iPad   284 4723   3884 4041.5 40630 104 40526
+  iPod touch   189 3734   3644 2713.0 28024 102 27922&gt;
+[/text]
+
+scores by type of death:
+
+[text]
+                                            death count mean stddev median   max  min range
+          hitting a wall and tumbling to my death   684 4155   3481 3319.5 36332  102 36230
+                           missing another window   243 5898   4981 4486.0 40630  409 40221
+                         turning into a fine mist    86 3592   2698 2662.5 16441  614 15827
+            colliding with some enormous obstacle    40 4768   4247 3256.5 16933  433 16500
+                              falling to my death    37 4176   3160 3619.0 13573  567 13006
+                       missing a crane completely    22 2950   1774 2923.5  7883  381  7502
+                         knocking a building down    21 3399   2267 2849.0  8374  336  8038
+                   not quite reaching a billboard    19 3098   1244 2980.0  5772  444  5328
+              landing where a building used to be    17 4804   4970 3631.0 22685 1170 21515
+          somehow hitting the edge of a billboard    14 5991   3827 5518.5 13547  566 12981
+   just barely stumbling out of the first hallway    13  104      1  104.0   104  102     2
+              somehow hitting the edge of a crane     7 5497   4835 4942.0 13275  510 12765
+       riding a falling building all the way down     4 4278   2162 4195.5  6993 1727  5266
+           completely  missing the entire hallway     1 1046     NA 1046.0  1046 1046     0
+[/text]
+
+And now, in the spirit of killing the almighty ink-data ratio, here are some pictures:
+<img class="alignnone size-full wp-image-503" title="overall plot of scores" src="http://www.neilkodner.com/wp-content/uploads/2011/02/canabaltscores.png" alt="plot of scores" width="619" height="630" />
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2011/02/bydeathfactedbytype11.png"><img class="alignnone size-large wp-image-505" title="by death faceted by device type" src="http://www.neilkodner.com/wp-content/uploads/2011/02/bydeathfactedbytype11-1024x779.png" alt="by death faceted by device type" width="717" height="545" /></a>
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2011/02/scores-by-device.png"><img class="alignnone size-full wp-image-507" title="scores by device" src="http://www.neilkodner.com/wp-content/uploads/2011/02/scores-by-device.png" alt="scores by device" width="534" height="539" /></a>
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2011/02/bydeathtype.png"><img class="alignnone size-large wp-image-509" title="bydeathtype" src="http://www.neilkodner.com/wp-content/uploads/2011/02/bydeathtype-1024x641.png" alt="by death type" width="614" height="385" /></a>
+
+What have we learned? So far, while my data set isn't altogether that large(1200 events), we might have enough to make some basic observations and assumptions(correction please!). Going into this experiment I thought that iPad players would have generally higher scores. This is because of #1 the larger screen size and #2 players wouldn't necessarily be playing 'on-the-go' as they would be (I know I am) on an iPhone or iPod touch. The iPad has higher median and average scores than the other devices. I'd like to revisit this as I collect more data.
+
+The leading cause of Canabalt death, by far, is hitting a wall and tumbling to one's death. This surprised me as I thought it would be falling to death - that's how my Canabalt games seem to end.
+
+I'd like to hear your comments suggestions for new analysis, and most of all, your corrections.  You know who you are and this is how I learn. The data and python/R source can be found on <a href="https://github.com/neilkod/canabalt">github</a>.
+
+The stack: Twitter Streaming API, EC2, MongoDB, Python, Regular Expressions, R
+
+Things I learned working on this: <a href="http://had.co.nz/plyr/">plyr</a>(group-by and aggregation in R), sorting dataframes in R, couple of new <a href="http://had.co.nz/ggplot2/">ggplot2</a> tricks.

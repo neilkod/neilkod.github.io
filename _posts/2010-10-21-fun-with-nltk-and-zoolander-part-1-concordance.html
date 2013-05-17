@@ -1,0 +1,26 @@
+--- 
+meta: 
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: fun with nltk and Zoolander, part 1 - concordance
+---
+I combined a few of my favorite things, mainly hacking, python, natural language, and of course, Zoolander, and it makes for some fun output.
+
+One of my favorite features of nltk is the <a href="http://nltk.googlecode.com/svn/trunk/doc/api/nltk.text.Text-class.html#concordance">concordance</a> function, which basically shows the context in which a given term is used.  It is referred to early on in the nltk book and never fails to provide entertaining output(hint: see how the word kill lines up?):
+<script src="http://gist.github.com/638472.js"> </script>
+
+A quick Google search yielded the Zoolander script <a href="http://www.script-o-rama.com/movie_scripts/z/zoolander-script-transcript-ben-stiller.html">here</a>.  From there, I copied and pasted the text and saved it as zoolander.txt.
+
+<!--more-->Sprinkle in a little bit of simple python:
+<script src="http://gist.github.com/638471.js"> </script>
+Here is the output for a few terms, as listed in the source code above.
+
+<script src="http://gist.github.com/638483.js"> </script>
+
+See?  Fun indeed.  Next post, we'll generate some random text based on lines from the movie.

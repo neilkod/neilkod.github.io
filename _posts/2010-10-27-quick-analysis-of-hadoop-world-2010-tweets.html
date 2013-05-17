@@ -1,0 +1,64 @@
+--- 
+meta: 
+  _edit_last: "1"
+status: draft
+type: post
+tags: []
+
+layout: post
+published: false
+title: Quick analysis of Hadoop World 2010 tweets
+---
+During the opening keynote of Hadoop World 2010, I created an EC2 micro instance and started downloading tweets mentioning #hw2010, the conference's hashtag.  24 hours later, I had collected about 1600 tweets.  After stripping out the halloween 2010 (seriously tweets), I played with the data just a little bit.
+
+Let's get the obligatory word frequency cloud out of the way.  Please click for full-sized version:
+
+<a href="http://www.neilkodner.com/wp-content/uploads/2010/10/hadoop-world-tweets.png"><img class="alignnone size-large wp-image-372" title="hadoop world tweets" src="http://www.neilkodner.com/wp-content/uploads/2010/10/hadoop-world-tweets-1024x472.png" alt="hadoop world 2010 tweets" width="819" height="378" /></a>
+
+From there, I ran a few queries against the data to find who was doing the tweeting, who was being retweeted, and who people were talking about.:
+
+Top #hw2010 tweeters:
+<ul>
+	<li><a href="http://twitter.com/#!/herberts">@herberts</a></li>
+	<li><a href="http://twitter.com/#!/ryu_kobayshi">@ryu_kobayshi</a></li>
+	<li><a href="http://twitter.com/#!/chrisshain">@chrisshain</a></li>
+	<li><a href="http://twitter.com/#!/phunt">@phunt</a></li>
+	<li><a href="http://twitter.com/#!/ccgillett">@ccgillett</a></li>
+	<li><a href="http://twitter.com/#!/alfyukio">@alfyukio</a></li>
+	<li><a href="http://twitter.com/#!/guutara">@guutara</a></li>
+</ul>
+Most frequently mentioned users in #hw2010 tweets:
+<ul>
+	<li><a href="http://twitter.com/#!/cloudera">@cloudera</a></li>
+	<li><a href="http://twitter.com/#!/timreolly">@timoreilly</a></li>
+	<li><a href="http://twitter.com/#!/mrflip">@mrflip</a></li>
+	<li><a href="http://twitter.com/#!/mikeolson">@mikeolson</a></li>
+	<li>@<a href="http://twitter.com/#!/kevinweil">kevinweil</a></li>
+	<li>@<a href="http://twitter.com/#!/herberts">herberts</a></li>
+	<li>@<a href="http://twitter.com/#!/hbase">hbase</a></li>
+</ul>
+Those who were most-often retweeted:
+<ul>
+	<li><a href="http://twitter.com/#!/herberts">@herberts</a></li>
+	<li><a href="http://twitter.com/#!/ccgillett">@ccgillett</a></li>
+	<li><a href="http://twitter.com/#!/cloudera">@cloudera</a></li>
+	<li><a href="http://twitter.com/#!/weckerson">@weckerson</a></li>
+	<li><a href="http://twitter.com/#!/metcalfc">@metcalfc</a></li>
+	<li><a href="http://twitter.com/#!/kevinweil">@kevinweil</a></li>
+	<li><a href="http://twitter.com/#!/yukim">@yukim</a></li>
+</ul>
+And, the top hashtags used in conjunction with #hw2010:
+<ul>
+	<li>#hadoop</li>
+	<li>#yam</li>
+	<li>#hbase</li>
+	<li>#thecube</li>
+	<li>#bigdata</li>
+	<li>#lovemyceo</li>
+	<li>#cloud</li>
+	<li>#cloudera</li>
+	<li>#flume</li>
+	<li>#rstats</li>
+	<li>#nosql</li>
+</ul>
+You can find the raw twitter data, in json format <a href="http://www.neilkodner.com/data/hadoop_world_2010_tweets.json">here</a>.

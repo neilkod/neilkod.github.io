@@ -1,0 +1,71 @@
+--- 
+meta: 
+  _syntaxhighlighter_encoded: "1"
+  _edit_last: "1"
+  _wp_old_slug: ""
+status: publish
+type: post
+tags: []
+
+layout: post
+published: true
+title: Twifficiency scores, analyzed and visualized
+---
+While I've had some success with getting a few celebrities to respond or show off <a href="http://www.twitter.com/thebotlebowski">@TheBotLebowski</a> to others(<a href="http://twitter.com/freddurst/statuses/11238246156">fred durst</a>, <a href="http://twitter.com/RealTalibKweli/status/12212218052">taleb kweli</a>), Yesterday, <a href="http://www.twifficiency.com">Twifficiency</a> one-upped me and took twitter and then the national media by storm.  Fortunately for you, <a href="http://www.twitter.com/jamescun">@jamescun</a>, Not too many people I know read your little <a href="http://newsfeed.time.com/2010/08/17/twifficiency-by-james-cunningham-better-than-a-college-diploma/">Time Magazine</a>. (I really hope you're old enough to get that!)
+
+As some of you may or may not know, I aggregate Twitter data and then use tools such as python, hadoop, pig, and R to play with the results.  Today's task was easy - Look through yesterday's tweets, grab the Twifficiency auto-tweets(eeew), extract the scores, and then see if there are any interesting results.
+
+After all of yesterday's tweets ran through my <a href="http://github.com/neilkod/tweetParser">parser</a>, I then filtered the input data to tweets that looked like they were Twifficiency scores(where 20100817.txt is the file of yesterday's parsed tweets that gets loaded into HDFS)
+
+[text]grep &quot;My Twifficiency score is [0-9]*%. Whats yours? http://twifficiency.com/$&quot; 20100817.txt &gt;twif.out[/text]
+
+I loaded twif.out through some horrible-before-the-coffee-is-even-made python code to produce a few summary statistics and then a file containing just the raw twifficiency scores:
+
+<!--more-->
+
+[python]
+#!/usr/bin/python
+import sys,re,numpy
+
+scores={}
+scorelist=[]
+# populate a dict from values 0-100 to match the existing twifficiency scores
+for i in range(100):
+  scores[i]=0
+
+# load an extracted sample of my twitter data
+#open a file
+f = open('scores.txt','w')
+for line in file('twif.out'):
+
+  (id,ts,user,tweet)=line.strip().split('\t')
+
+  #extract the numeric score from the tweet
+  thescore=re.search('[0-9][0-9]?',tweet)
+  scoreval=int(thescore.group(0))
+  scorelist.append(scoreval)
+
+  #  eventually do something with the timestamp, etc.
+  #  print &quot;%s\t%s\t%s&quot; % (user,ts,scoreval)
+  scores[scoreval] += 1
+
+  # write the score to the raw data file
+  s = &quot;%s\n&quot; % scoreval
+  f.write(s)
+
+a=numpy.array(scorelist)
+print numpy.size(a)
+print numpy.std(a)
+print numpy.average(a)
+f.close()
+[/python]
+
+Now, the good stuff.  Out of  7,089 twifficiency tweets from yesterday(the gardenhose has been severly throttled lately), the scores range from 0-99.  I think I remember @jamescun mentioning the max score is %100, I haven't seen it yet.  The mean Twifficiency score is 38.5285 and the standard deviation is 11.1036.   The score at the 25th percentile is  32, the median score is 39, and the score at the 75th percentile is 47.
+
+After loading into R and plotting a histogram, the scores seem to follow a pretty normal distribution(<strong>update</strong>: it's not-Check out <a href="http://www.twitter.com/johnmyleswhite">@johnmyleswhite</a>'s comment below):
+
+[caption id="attachment_322" align="alignnone" width="720" caption="Distribution of Twifficiency scores"]<a href="http://www.neilkodner.com/wp-content/uploads/2010/08/twifficiencyfreq.png"><img class="size-full wp-image-322 " title="twifficiencyfreq" src="http://www.neilkodner.com/wp-content/uploads/2010/08/twifficiencyfreq.png" alt="" width="720" height="587" /></a>[/caption]
+
+Although i consider myself a prominent auto-tweeter(<a href="http://www.twitter.com/thebotlebowski">@TheBotLebowski</a> <a href="http://www.twitter.com/hellooooonewman">@HelloooooNewman</a> <a href="http://www.twitter.com/acenterforants">@ACenterForAnts</a>), I'm not crazy about the idea of having an app send a tweet without permission.  Lets hope @jamescun fixes this or at least clarifies it a little better.  Having said that, I love seeing this type of story and with James the best even if he is emo(Just kidding James!!).
+
+edit: the raw twifficiency score data may be found <a href="http://www.neilkodner.com/twifficiencyscores.txt">here</a>.
